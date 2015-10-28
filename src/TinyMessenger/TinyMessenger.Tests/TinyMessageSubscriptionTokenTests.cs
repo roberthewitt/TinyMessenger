@@ -2,16 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using TinyMessenger.Tests.TestData;
 using TinyMessenger;
+using System.Threading;
 
 namespace TinyMessenger.Tests
 {
-    [TestClass]
+    [TestFixtureAttribute]
     public class TinyMessageSubscriptionTokenTests
     {
-        [TestMethod]
+        [TestAttribute]
         public void Dispose_WithValidHubReference_UnregistersWithHub()
         {
             var messengerMock = new Moq.Mock<ITinyMessengerHub>();
@@ -23,40 +24,40 @@ namespace TinyMessenger.Tests
             messengerMock.VerifyAll();
         }
 
-        [TestMethod]
+		[TestAttribute]
         public void Dispose_WithInvalidHubReference_DoesNotThrow()
         {
             var token = UtilityMethods.GetTokenWithOutOfScopeMessenger();
             GC.Collect();
-            GC.WaitForFullGCComplete(2000);
+			Thread.Sleep(2000);
 
             token.Dispose();
         }
 
-        [TestMethod]
+		[TestAttribute]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Ctor_NullHub_ThrowsArgumentNullException()
         {
-            var messenger = UtilityMethods.GetMessenger();
+            UtilityMethods.GetMessenger();
 
-            var token = new TinyMessageSubscriptionToken(null, typeof(ITinyMessage));
+            new TinyMessageSubscriptionToken(null, typeof(ITinyMessage));
         }
 
-        [TestMethod]
+		[TestAttribute]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void Ctor_InvalidMessageType_ThrowsArgumentOutOfRangeException()
         {
             var messenger = UtilityMethods.GetMessenger();
 
-            var token = new TinyMessageSubscriptionToken(messenger, typeof(object));
+            new TinyMessageSubscriptionToken(messenger, typeof(object));
         }
 
-        [TestMethod]
+		[TestAttribute]
         public void Ctor_ValidHubAndMessageType_DoesNotThrow()
         {
             var messenger = UtilityMethods.GetMessenger();
 
-            var token = new TinyMessageSubscriptionToken(messenger, typeof(TestMessage));
+            new TinyMessageSubscriptionToken(messenger, typeof(TestMessage));
         }
     }
 }

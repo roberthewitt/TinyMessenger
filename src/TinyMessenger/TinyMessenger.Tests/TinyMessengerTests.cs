@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using TinyMessenger.Tests.TestData;
 using TinyMessenger;
 using System.Threading;
@@ -10,16 +10,16 @@ using System.Threading;
 namespace TinyMessenger.Tests
 {
 
-    [TestClass]
+	[TestFixture]
     public class TinyMessengerTests
     {
-        [TestMethod]
+		[Test]
         public void TinyMessenger_Ctor_DoesNotThrow()
         {
-            var messenger = UtilityMethods.GetMessenger();
+            UtilityMethods.GetMessenger();
         }
 
-        [TestMethod]
+		[Test]
         public void Subscribe_ValidDeliverAction_DoesNotThrow()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -27,17 +27,17 @@ namespace TinyMessenger.Tests
             messenger.Subscribe<TestMessage>(new Action<TestMessage>(UtilityMethods.FakeDeliveryAction<TestMessage>));
         }
 
-        [TestMethod]
+		[Test]
         public void SubScribe_ValidDeliveryAction_ReturnsRegistrationObject()
         {
             var messenger = UtilityMethods.GetMessenger();
 
             var output = messenger.Subscribe<TestMessage>(new Action<TestMessage>(UtilityMethods.FakeDeliveryAction<TestMessage>));
 
-            Assert.IsInstanceOfType(output, typeof(TinyMessageSubscriptionToken));
+			Assert.That(output, Is.InstanceOf<TinyMessageSubscriptionToken>());
         }
 
-        [TestMethod]
+		[Test]
         public void Subscribe_ValidDeliverActionWIthStrongReferences_DoesNotThrow()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -45,7 +45,7 @@ namespace TinyMessenger.Tests
             messenger.Subscribe<TestMessage>(new Action<TestMessage>(UtilityMethods.FakeDeliveryAction<TestMessage>), true);
         }
 
-        [TestMethod]
+		[Test]
         public void Subscribe_ValidDeliveryActionAndFilter_DoesNotThrow()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -53,7 +53,7 @@ namespace TinyMessenger.Tests
             messenger.Subscribe<TestMessage>(new Action<TestMessage>(UtilityMethods.FakeDeliveryAction<TestMessage>), new Func<TestMessage, bool>(UtilityMethods.FakeMessageFilter<TestMessage>));
         }
 
-        [TestMethod]
+		[Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Subscribe_NullDeliveryAction_Throws()
         {
@@ -62,7 +62,7 @@ namespace TinyMessenger.Tests
             messenger.Subscribe<TestMessage>(null, new Func<TestMessage, bool>(UtilityMethods.FakeMessageFilter<TestMessage>));
         }
 
-        [TestMethod]
+		[Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Subscribe_NullFilter_Throws()
         {
@@ -71,7 +71,7 @@ namespace TinyMessenger.Tests
             messenger.Subscribe<TestMessage>(new Action<TestMessage>(UtilityMethods.FakeDeliveryAction<TestMessage>), null, new TestProxy());
         }
 
-        [TestMethod]
+		[Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Subscribe_NullProxy_Throws()
         {
@@ -80,7 +80,7 @@ namespace TinyMessenger.Tests
             messenger.Subscribe<TestMessage>(new Action<TestMessage>(UtilityMethods.FakeDeliveryAction<TestMessage>), new Func<TestMessage, bool>(UtilityMethods.FakeMessageFilter<TestMessage>), null);
         }
 
-        [TestMethod]
+		[Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Unsubscribe_NullSubscriptionObject_Throws()
         {
@@ -89,7 +89,7 @@ namespace TinyMessenger.Tests
             messenger.Unsubscribe<TestMessage>(null);
         }
 
-        [TestMethod]
+		[Test]
         public void Unsubscribe_PreviousSubscription_DoesNotThrow()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -98,7 +98,7 @@ namespace TinyMessenger.Tests
             messenger.Unsubscribe<TestMessage>(subscription);
         }
 
-        [TestMethod]
+		[Test]
         public void Subscribe_PreviousSubscription_ReturnsDifferentSubscriptionObject()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -108,7 +108,7 @@ namespace TinyMessenger.Tests
             Assert.IsFalse(object.ReferenceEquals(sub1, sub2));
         }
 
-        [TestMethod]
+		[Test]
         public void Subscribe_CustomProxyNoFilter_DoesNotThrow()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -117,7 +117,7 @@ namespace TinyMessenger.Tests
             messenger.Subscribe<TestMessage>(new Action<TestMessage>(UtilityMethods.FakeDeliveryAction<TestMessage>), proxy);
         }
 
-        [TestMethod]
+		[Test]
         public void Subscribe_CustomProxyWithFilter_DoesNotThrow()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -126,7 +126,7 @@ namespace TinyMessenger.Tests
             messenger.Subscribe<TestMessage>(new Action<TestMessage>(UtilityMethods.FakeDeliveryAction<TestMessage>), new Func<TestMessage, bool>(UtilityMethods.FakeMessageFilter<TestMessage>), proxy);
         }
 
-        [TestMethod]
+		[Test]
         public void Subscribe_CustomProxyNoFilterStrongReference_DoesNotThrow()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -135,7 +135,7 @@ namespace TinyMessenger.Tests
             messenger.Subscribe<TestMessage>(new Action<TestMessage>(UtilityMethods.FakeDeliveryAction<TestMessage>), true, proxy);
         }
 
-        [TestMethod]
+		[Test]
         public void Subscribe_CustomProxyFilterStrongReference_DoesNotThrow()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -144,7 +144,7 @@ namespace TinyMessenger.Tests
             messenger.Subscribe<TestMessage>(new Action<TestMessage>(UtilityMethods.FakeDeliveryAction<TestMessage>), new Func<TestMessage, bool>(UtilityMethods.FakeMessageFilter<TestMessage>), true, proxy);
         }
 
-        [TestMethod]
+		[Test]
         public void Publish_CustomProxyNoFilter_UsesCorrectProxy()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -154,10 +154,10 @@ namespace TinyMessenger.Tests
 
             messenger.Publish<TestMessage>(message);
 
-            Assert.ReferenceEquals(message, proxy.Message);
+            Assert.AreSame(message, proxy.Message);
         }
 
-        [TestMethod]
+		[Test]
         public void Publish_CustomProxyWithFilter_UsesCorrectProxy()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -167,10 +167,10 @@ namespace TinyMessenger.Tests
 
             messenger.Publish<TestMessage>(message);
 
-            Assert.ReferenceEquals(message, proxy.Message);
+            Assert.AreSame(message, proxy.Message);
         }
 
-        [TestMethod]
+		[Test]
         public void Publish_CustomProxyNoFilterStrongReference_UsesCorrectProxy()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -180,10 +180,10 @@ namespace TinyMessenger.Tests
 
             messenger.Publish<TestMessage>(message);
 
-            Assert.ReferenceEquals(message, proxy.Message);
+            Assert.AreSame(message, proxy.Message);
         }
 
-        [TestMethod]
+        [Test]
         public void Publish_CustomProxyFilterStrongReference_UsesCorrectProxy()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -193,10 +193,10 @@ namespace TinyMessenger.Tests
 
             messenger.Publish<TestMessage>(message);
 
-            Assert.ReferenceEquals(message, proxy.Message);
+			Assert.AreSame(message, proxy.Message);
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Publish_NullMessage_Throws()
         {
@@ -205,7 +205,7 @@ namespace TinyMessenger.Tests
             messenger.Publish<TestMessage>(null);
         }
 
-        [TestMethod]
+        [Test]
         public void Publish_NoSubscribers_DoesNotThrow()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -213,7 +213,7 @@ namespace TinyMessenger.Tests
             messenger.Publish<TestMessage>(new TestMessage(this));
         }
 
-        [TestMethod]
+        [Test]
         public void Publish_Subscriber_DoesNotThrow()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -222,7 +222,7 @@ namespace TinyMessenger.Tests
             messenger.Publish<TestMessage>(new TestMessage(this));
         }
 
-        [TestMethod]
+        [Test]
         public void Publish_SubscribedMessageNoFilter_GetsMessage()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -234,7 +234,7 @@ namespace TinyMessenger.Tests
             Assert.IsTrue(received);
         }
 
-        [TestMethod]
+        [Test]
         public void Publish_SubscribedThenUnsubscribedMessageNoFilter_DoesNotGetMessage()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -247,7 +247,7 @@ namespace TinyMessenger.Tests
             Assert.IsFalse(received);
         }
 
-        [TestMethod]
+        [Test]
         public void Publish_SubscribedMessageButFiltered_DoesNotGetMessage()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -259,7 +259,7 @@ namespace TinyMessenger.Tests
             Assert.IsFalse(received);
         }
 
-        [TestMethod]
+        [Test]
         public void Publish_SubscribedMessageNoFilter_GetsActualMessage()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -269,10 +269,10 @@ namespace TinyMessenger.Tests
 
             messenger.Publish<TestMessage>(payload);
 
-            Assert.ReferenceEquals(payload, receivedMessage);
+			Assert.AreSame(payload, receivedMessage);
         }
 
-        [TestMethod]
+        [Test]
         public void GenericTinyMessage_String_SubscribeDoesNotThrow()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -280,14 +280,14 @@ namespace TinyMessenger.Tests
             messenger.Subscribe<GenericTinyMessage<string>>((m) => { output = m.Content; });
         }
 
-        [TestMethod]
+        [Test]
         public void GenericTinyMessage_String_PubishDoesNotThrow()
         {
             var messenger = UtilityMethods.GetMessenger();
             messenger.Publish(new GenericTinyMessage<string>(this, "Testing"));
         }
 
-        [TestMethod]
+        [Test]
         public void GenericTinyMessage_String_PubishAndSubscribeDeliversContent()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -298,7 +298,7 @@ namespace TinyMessenger.Tests
             Assert.AreEqual("Testing", output);
         }
 
-        [TestMethod]
+        [Test]
         public void Publish_SubscriptionThrowingException_DoesNotThrow()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -307,7 +307,7 @@ namespace TinyMessenger.Tests
             messenger.Publish(new GenericTinyMessage<string>(this, "Testing"));
         }
 
-        [TestMethod]
+        [Test]
         public void PublishAsync_NoCallback_DoesNotThrow()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -315,7 +315,7 @@ namespace TinyMessenger.Tests
             messenger.PublishAsync(new TestMessage(this));
         }
 
-        [TestMethod]
+        [Test]
         public void PublishAsync_NoCallback_PublishesMessage()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -334,7 +334,7 @@ namespace TinyMessenger.Tests
             Assert.IsTrue(received);
         }
 
-        [TestMethod]
+        [Test]
         public void PublishAsync_Callback_DoesNotThrow()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -343,7 +343,7 @@ namespace TinyMessenger.Tests
 #pragma warning restore 219
         }
 
-        [TestMethod]
+        [Test]
         public void PublishAsync_Callback_PublishesMessage()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -364,7 +364,7 @@ namespace TinyMessenger.Tests
             Assert.IsTrue(received);
         }
 
-        [TestMethod]
+        [Test]
         public void PublishAsync_Callback_CallsCallback()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -384,7 +384,7 @@ namespace TinyMessenger.Tests
             Assert.IsTrue(received);
         }
 
-        [TestMethod]
+        [Test]
         public void CancellableGenericTinyMessage_Publish_DoesNotThrow()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -393,7 +393,7 @@ namespace TinyMessenger.Tests
 #pragma warning restore 219
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void CancellableGenericTinyMessage_PublishWithNullAction_Throws()
         {
@@ -401,7 +401,7 @@ namespace TinyMessenger.Tests
             messenger.Publish<CancellableGenericTinyMessage<string>>(new CancellableGenericTinyMessage<string>(this, "Testing", null));
         }
 
-        [TestMethod]
+        [Test]
         public void CancellableGenericTinyMessage_SubscriberCancels_CancelActioned()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -413,7 +413,7 @@ namespace TinyMessenger.Tests
             Assert.IsTrue(cancelled);
         }
 
-        [TestMethod]
+        [Test]
         public void CancellableGenericTinyMessage_SeveralSubscribersOneCancels_CancelActioned()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -428,7 +428,7 @@ namespace TinyMessenger.Tests
             Assert.IsTrue(cancelled);
         }
 
-        [TestMethod]
+        [Test]
         public void Publish_SubscriptionOnBaseClass_HitsSubscription()
         {
             var received = false;
@@ -440,7 +440,7 @@ namespace TinyMessenger.Tests
             Assert.IsTrue(received);
         }
 
-        [TestMethod]
+        [Test]
         public void Publish_SubscriptionOnImplementedInterface_HitsSubscription()
         {
             var received = false;
