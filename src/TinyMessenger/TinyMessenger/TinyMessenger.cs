@@ -212,6 +212,16 @@ namespace TinyMessenger
     public interface ITinyMessengerHub
     {
         /// <summary>
+        /// Subscribe an object to all event types that it subscribes to. An object subscribes to an event
+        /// by annotating a method with the [Subscribe] attribute, the parameter of the method indicating the event type to listen for.
+        /// 
+        /// </summary>
+        /// <param name="listener">Object that is listening for events. The hub will keep a reference to this object until
+        /// Unsubscribe is called with this object</param>
+        /// <returns>A list of subscription tokens that can be used to unsubscribe from individual</returns>
+        IList<TinyMessageSubscriptionToken> Subscribe(object listener);
+
+        /// <summary>
         /// Subscribe to a message type with the given destination and delivery action.
         /// All references are held with WeakReferences
         /// 
@@ -479,6 +489,67 @@ namespace TinyMessenger
         #endregion
 
         #region Public API
+
+        public IList<TinyMessageSubscriptionToken> Subscribe(object listener)
+        {
+            Dictionary<Type, List<Action<object>>> methodsInSubscriber = FindAllHandlers(listener);
+            List<TinyMessageSubscriptionToken> tokens = new List<TinyMessageSubscriptionToken>();
+
+            foreach (var key in methodsInSubscriber.Keys) {
+                List<Action<object>> actions = methodsInSubscriber[key];
+
+                foreach (var action in actions) {
+                    IEnumerable<MethodInfo> subscribeInternalMethods = this.GetType().GetRuntimeMethods().Where<MethodInfo>((method) =>
+                        {
+                            String name = method.Name;
+                            return name == "AddSubscriptionInternal" ? true : false;
+                        });
+                    MethodInfo subscribeInternalMethod = subscribeInternalMethods.First();
+                    Func<object, bool> messageFilter = (m) => true;
+                    subscribeInternalMethod = subscribeInternalMethod.MakeGenericMethod(key);
+                    TinyMessageSubscriptionToken token = (TinyMessageSubscriptionToken)subscribeInternalMethod.Invoke(this, new object[] {action, messageFilter, true, DefaultTinyMessageProxy.Instance});
+
+                    tokens.Add(token);
+                }
+            }
+
+            return tokens;
+        }
+
+        Dictionary<Type, List<Action<object>>> FindAllHandlers(object listener) {
+            var result = new Dictionary<Type, List<Action<object>>>();
+
+            foreach (MethodInfo method in GetMarkedMethods(listener))
+            {
+                ParameterInfo[] parmetersTypes = method.GetParameters();
+                Type eventType = parmetersTypes[0].ParameterType;
+                Action<object> action = (e) => { method.Invoke(listener, new object[] {e}); };
+                List<Action<object>> actions = null;
+
+                if (result.ContainsKey(eventType)) {
+                    actions = result[eventType];
+                    actions.Add(action);
+                } else {
+                    actions = new List<Action<object>> ();
+                    actions.Add(action);
+                    result.Add(eventType, actions);
+                }
+
+            }
+
+            return result;
+        }
+
+        private IEnumerable<MethodInfo> GetMarkedMethods(object listener)
+        {
+            Type typeOfClass = listener.GetType();
+            return typeOfClass.GetRuntimeMethods().Where<MethodInfo>((method) =>
+                {
+                    Attribute attribute = method.GetCustomAttribute(typeof(Subscribe));
+                    return attribute == null ? false : true;
+                });
+        }
+
         /// <summary>
         /// Subscribe to a message type with the given destination and delivery action.
         /// All references are held with strong references

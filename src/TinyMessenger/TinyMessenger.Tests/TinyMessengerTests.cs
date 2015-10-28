@@ -144,6 +144,17 @@ namespace TinyMessenger.Tests
             messenger.Subscribe<TestMessage>(new Action<TestMessage>(UtilityMethods.FakeDeliveryAction<TestMessage>), new Func<TestMessage, bool>(UtilityMethods.FakeMessageFilter<TestMessage>), true, proxy);
         }
 
+        [Test]
+        public void Subscribe_ListenerWithAnnotatedMethod_ReturnsRegistrationMap()
+        {
+            var messenger = UtilityMethods.GetMessenger();
+            var listener = UtilityMethods.GetListener();
+
+            var output = messenger.Subscribe(listener);
+
+            Assert.That(output, Is.InstanceOf< List<TinyMessageSubscriptionToken> >());
+        }
+
 		[Test]
         public void Publish_CustomProxyNoFilter_UsesCorrectProxy()
         {

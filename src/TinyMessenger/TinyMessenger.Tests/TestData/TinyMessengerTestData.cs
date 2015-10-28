@@ -50,4 +50,11 @@ namespace TinyMessenger.Tests.TestData
         }
     }
 
+    public class TestMessageListener
+    {
+        [Subscribe]
+        public void OnTestMessage(TestMessage message)
+        {
+        }
+    }
 }

@@ -46,5 +46,10 @@ namespace TinyMessenger.Tests.TestData
 
             return token;
         }
+
+        public static TestMessageListener GetListener()
+        {
+            return new TestMessageListener();
+        }
     }
 }
