@@ -735,7 +735,7 @@ namespace TinyMessenger
 
                 foreach (SubscriptionItem subscriptionItem in currentlySubscribed.ToList())
                 {
-                    currentlySubscribed.Remove(subscriptionItem);
+					_Subscriptions.Remove(subscriptionItem);
                 }
             }
         }
