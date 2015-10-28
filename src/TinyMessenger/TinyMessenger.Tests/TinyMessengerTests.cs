@@ -284,6 +284,19 @@ namespace TinyMessenger.Tests
         }
 
         [Test]
+        public void Publish_SubscribedListenerWithAnnotatedMethod_SubscribedMethodGetsActualMessage()
+        {
+            var messenger = UtilityMethods.GetMessenger();
+            var listener = UtilityMethods.GetListener();
+            var payload = new TestMessage();
+            messenger.Subscribe(listener);
+
+            messenger.Publish<TestMessage>(payload);
+
+            Assert.AreSame(payload, listener.ReceivedTestMessage);
+        }
+
+        [Test]
         public void GenericTinyMessage_String_SubscribeDoesNotThrow()
         {
             var messenger = UtilityMethods.GetMessenger();

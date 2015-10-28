@@ -52,9 +52,12 @@ namespace TinyMessenger.Tests.TestData
 
     public class TestMessageListener
     {
+        public TestMessage ReceivedTestMessage;
+
         [Subscribe]
         public void OnTestMessage(TestMessage message)
         {
+            ReceivedTestMessage = message;
         }
     }
 }
