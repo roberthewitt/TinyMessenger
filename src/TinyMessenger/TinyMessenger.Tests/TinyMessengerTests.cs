@@ -150,7 +150,7 @@ namespace TinyMessenger.Tests
             var messenger = UtilityMethods.GetMessenger();
             var proxy = new TestProxy();
             messenger.Subscribe<TestMessage>(new Action<TestMessage>(UtilityMethods.FakeDeliveryAction<TestMessage>), proxy);
-            var message = new TestMessage(this);
+            var message = new TestMessage();
 
             messenger.Publish<TestMessage>(message);
 
@@ -163,7 +163,7 @@ namespace TinyMessenger.Tests
             var messenger = UtilityMethods.GetMessenger();
             var proxy = new TestProxy();
             messenger.Subscribe<TestMessage>(new Action<TestMessage>(UtilityMethods.FakeDeliveryAction<TestMessage>), new Func<TestMessage, bool>(UtilityMethods.FakeMessageFilter<TestMessage>), proxy);
-            var message = new TestMessage(this);
+            var message = new TestMessage();
 
             messenger.Publish<TestMessage>(message);
 
@@ -176,7 +176,7 @@ namespace TinyMessenger.Tests
             var messenger = UtilityMethods.GetMessenger();
             var proxy = new TestProxy();
             messenger.Subscribe<TestMessage>(new Action<TestMessage>(UtilityMethods.FakeDeliveryAction<TestMessage>), true, proxy);
-            var message = new TestMessage(this);
+            var message = new TestMessage();
 
             messenger.Publish<TestMessage>(message);
 
@@ -189,7 +189,7 @@ namespace TinyMessenger.Tests
             var messenger = UtilityMethods.GetMessenger();
             var proxy = new TestProxy();
             messenger.Subscribe<TestMessage>(new Action<TestMessage>(UtilityMethods.FakeDeliveryAction<TestMessage>), new Func<TestMessage, bool>(UtilityMethods.FakeMessageFilter<TestMessage>), true, proxy);
-            var message = new TestMessage(this);
+            var message = new TestMessage();
 
             messenger.Publish<TestMessage>(message);
 
@@ -210,7 +210,7 @@ namespace TinyMessenger.Tests
         {
             var messenger = UtilityMethods.GetMessenger();
 
-            messenger.Publish<TestMessage>(new TestMessage(this));
+            messenger.Publish<TestMessage>(new TestMessage());
         }
 
         [Test]
@@ -219,7 +219,7 @@ namespace TinyMessenger.Tests
             var messenger = UtilityMethods.GetMessenger();
             messenger.Subscribe<TestMessage>(new Action<TestMessage>(UtilityMethods.FakeDeliveryAction<TestMessage>), new Func<TestMessage, bool>(UtilityMethods.FakeMessageFilter<TestMessage>));
 
-            messenger.Publish<TestMessage>(new TestMessage(this));
+            messenger.Publish<TestMessage>(new TestMessage());
         }
 
         [Test]
@@ -229,7 +229,7 @@ namespace TinyMessenger.Tests
             bool received = false;
             messenger.Subscribe<TestMessage>((m) => { received = true; });
 
-            messenger.Publish<TestMessage>(new TestMessage(this));
+            messenger.Publish<TestMessage>(new TestMessage());
 
             Assert.IsTrue(received);
         }
@@ -242,7 +242,7 @@ namespace TinyMessenger.Tests
             var token = messenger.Subscribe<TestMessage>((m) => { received = true; });
             messenger.Unsubscribe<TestMessage>(token);
 
-            messenger.Publish<TestMessage>(new TestMessage(this));
+            messenger.Publish<TestMessage>(new TestMessage());
 
             Assert.IsFalse(received);
         }
@@ -254,7 +254,7 @@ namespace TinyMessenger.Tests
             bool received = false;
             messenger.Subscribe<TestMessage>((m) => { received = true; }, (m) => false);
 
-            messenger.Publish<TestMessage>(new TestMessage(this));
+            messenger.Publish<TestMessage>(new TestMessage());
 
             Assert.IsFalse(received);
         }
@@ -263,8 +263,8 @@ namespace TinyMessenger.Tests
         public void Publish_SubscribedMessageNoFilter_GetsActualMessage()
         {
             var messenger = UtilityMethods.GetMessenger();
-            ITinyMessage receivedMessage = null;
-            var payload = new TestMessage(this);
+			object receivedMessage = null;
+            var payload = new TestMessage();
             messenger.Subscribe<TestMessage>((m) => { receivedMessage = m; });
 
             messenger.Publish<TestMessage>(payload);
@@ -284,7 +284,7 @@ namespace TinyMessenger.Tests
         public void GenericTinyMessage_String_PubishDoesNotThrow()
         {
             var messenger = UtilityMethods.GetMessenger();
-            messenger.Publish(new GenericTinyMessage<string>(this, "Testing"));
+            messenger.Publish(new GenericTinyMessage<string>("Testing"));
         }
 
         [Test]
@@ -293,7 +293,7 @@ namespace TinyMessenger.Tests
             var messenger = UtilityMethods.GetMessenger();
             var output = string.Empty;
             messenger.Subscribe<GenericTinyMessage<string>>((m) => { output = m.Content; });
-            messenger.Publish(new GenericTinyMessage<string>(this, "Testing"));
+            messenger.Publish(new GenericTinyMessage<string>("Testing"));
 
             Assert.AreEqual("Testing", output);
         }
@@ -304,7 +304,7 @@ namespace TinyMessenger.Tests
             var messenger = UtilityMethods.GetMessenger();
             messenger.Subscribe<GenericTinyMessage<string>>((m) => { throw new NotImplementedException(); });
 
-            messenger.Publish(new GenericTinyMessage<string>(this, "Testing"));
+            messenger.Publish(new GenericTinyMessage<string>("Testing"));
         }
 
         [Test]
@@ -312,7 +312,7 @@ namespace TinyMessenger.Tests
         {
             var messenger = UtilityMethods.GetMessenger();
 
-            messenger.PublishAsync(new TestMessage(this));
+            messenger.PublishAsync(new TestMessage());
         }
 
         [Test]
@@ -322,7 +322,7 @@ namespace TinyMessenger.Tests
             bool received = false;
             messenger.Subscribe<TestMessage>((m) => { received = true; });
 
-            messenger.PublishAsync(new TestMessage(this));
+            messenger.PublishAsync(new TestMessage());
 
             // Horrible wait loop!
             int waitCount = 0;
@@ -339,7 +339,7 @@ namespace TinyMessenger.Tests
         {
             var messenger = UtilityMethods.GetMessenger();
 #pragma warning disable 219
-            messenger.PublishAsync(new TestMessage(this), (r) => {string test = "Testing";});
+            messenger.PublishAsync(new TestMessage(), (r) => {string test = "Testing";});
 #pragma warning restore 219
         }
 
@@ -351,7 +351,7 @@ namespace TinyMessenger.Tests
             messenger.Subscribe<TestMessage>((m) => { received = true; });
 
 #pragma warning disable 219
-            messenger.PublishAsync(new TestMessage(this), (r) => { string test = "Testing"; });
+            messenger.PublishAsync(new TestMessage(), (r) => { string test = "Testing"; });
 #pragma warning restore 219
 
             // Horrible wait loop!
@@ -372,7 +372,7 @@ namespace TinyMessenger.Tests
             bool callbackReceived = false;
             messenger.Subscribe<TestMessage>((m) => { received = true; });
 
-            messenger.PublishAsync(new TestMessage(this), (r) => { callbackReceived = true; });
+            messenger.PublishAsync(new TestMessage(), (r) => { callbackReceived = true; });
 
             // Horrible wait loop!
             int waitCount = 0;
@@ -389,7 +389,7 @@ namespace TinyMessenger.Tests
         {
             var messenger = UtilityMethods.GetMessenger();
 #pragma warning disable 219
-            messenger.Publish<CancellableGenericTinyMessage<string>>(new CancellableGenericTinyMessage<string>(this, "Testing", () => { bool test = true; }));
+            messenger.Publish<CancellableGenericTinyMessage<string>>(new CancellableGenericTinyMessage<string>("Testing", () => { bool test = true; }));
 #pragma warning restore 219
         }
 
@@ -398,7 +398,7 @@ namespace TinyMessenger.Tests
         public void CancellableGenericTinyMessage_PublishWithNullAction_Throws()
         {
             var messenger = UtilityMethods.GetMessenger();
-            messenger.Publish<CancellableGenericTinyMessage<string>>(new CancellableGenericTinyMessage<string>(this, "Testing", null));
+            messenger.Publish<CancellableGenericTinyMessage<string>>(new CancellableGenericTinyMessage<string>("Testing", null));
         }
 
         [Test]
@@ -408,7 +408,7 @@ namespace TinyMessenger.Tests
             bool cancelled = false;
             messenger.Subscribe<CancellableGenericTinyMessage<string>>((m) => { m.Cancel(); });
 
-            messenger.Publish<CancellableGenericTinyMessage<string>>(new CancellableGenericTinyMessage<string>(this, "Testing", () => { cancelled = true; }));
+            messenger.Publish<CancellableGenericTinyMessage<string>>(new CancellableGenericTinyMessage<string>("Testing", () => { cancelled = true; }));
 
             Assert.IsTrue(cancelled);
         }
@@ -423,7 +423,7 @@ namespace TinyMessenger.Tests
             messenger.Subscribe<CancellableGenericTinyMessage<string>>((m) => { m.Cancel(); });
             messenger.Subscribe<CancellableGenericTinyMessage<string>>((m) => { var test = 1; });
 #pragma warning restore 219
-            messenger.Publish<CancellableGenericTinyMessage<string>>(new CancellableGenericTinyMessage<string>(this, "Testing", () => { cancelled = true; }));
+            messenger.Publish<CancellableGenericTinyMessage<string>>(new CancellableGenericTinyMessage<string>("Testing", () => { cancelled = true; }));
 
             Assert.IsTrue(cancelled);
         }

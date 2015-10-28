@@ -40,16 +40,7 @@ namespace TinyMessenger.Tests
         {
             UtilityMethods.GetMessenger();
 
-            new TinyMessageSubscriptionToken(null, typeof(ITinyMessage));
-        }
-
-		[TestAttribute]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
-        public void Ctor_InvalidMessageType_ThrowsArgumentOutOfRangeException()
-        {
-            var messenger = UtilityMethods.GetMessenger();
-
-            new TinyMessageSubscriptionToken(messenger, typeof(object));
+			new TinyMessageSubscriptionToken(null, typeof(object));
         }
 
 		[TestAttribute]

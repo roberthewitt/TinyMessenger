@@ -6,11 +6,10 @@ using TinyMessenger;
 
 namespace TinyMessenger.Tests.TestData
 {
-    public class TestMessage : TinyMessageBase
+    public class TestMessage 
     {
-        public TestMessage(object sender) : base(sender)
+        public TestMessage()
         {
-            
         }
     }
 
@@ -19,12 +18,11 @@ namespace TinyMessenger.Tests.TestData
         public TThings Things { get; set; }
 
         public DerivedMessage(object sender)
-            : base(sender)
         {
         }
     }
 
-    public interface ITestMessageInterface : ITinyMessage
+    public interface ITestMessageInterface
     {
         
     }
@@ -43,9 +41,9 @@ namespace TinyMessenger.Tests.TestData
 
     public class TestProxy : ITinyMessageProxy
     {
-        public ITinyMessage Message {get; private set;}
+		public object Message {get; private set;}
 
-        public void Deliver(ITinyMessage message, ITinyMessageSubscription subscription)
+		public void Deliver(object message, ITinyMessageSubscription subscription)
         {
             this.Message = message;
             subscription.Deliver(message);

@@ -28,12 +28,12 @@ namespace TinyMessenger.Tests.TestData
         }
 
         public static void FakeDeliveryAction<T>(T message)
-            where T:ITinyMessage
+            where T:class
         {
         }
 
         public static bool FakeMessageFilter<T>(T message)
-            where T:ITinyMessage
+            where T:class
         {
             return true;
         }
