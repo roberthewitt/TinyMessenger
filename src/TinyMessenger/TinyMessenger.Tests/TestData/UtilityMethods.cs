@@ -18,28 +18,22 @@ using System.Linq;
 using System.Text;
 using TinyMessenger;
 
-namespace TinyMessenger.Tests.TestData
-{
-    public class UtilityMethods
-    {
-        public static ITinyMessengerHub GetMessenger()
-        {
+namespace TinyMessenger.Tests.TestData {
+    public class UtilityMethods {
+        public static ITinyMessengerHub GetMessenger() {
             return new TinyMessengerHub();
         }
 
         public static void FakeDeliveryAction<T>(T message)
-            where T:class
-        {
+            where T:class {
         }
 
         public static bool FakeMessageFilter<T>(T message)
-            where T:class
-        {
+            where T:class {
             return true;
         }
 
-        public static TinyMessageSubscriptionToken GetTokenWithOutOfScopeMessenger()
-        {
+        public static TinyMessageSubscriptionToken GetTokenWithOutOfScopeMessenger() {
             var messenger = UtilityMethods.GetMessenger();
 
             var token = new TinyMessageSubscriptionToken(messenger, typeof(TestMessage));
@@ -47,13 +41,11 @@ namespace TinyMessenger.Tests.TestData
             return token;
         }
 
-        public static TestMessageListener GetListener()
-        {
+        public static TestMessageListener GetListener() {
             return new TestMessageListener();
         }
 
-        public static TestMessageMultiListener GetMultiListener()
-        {
+        public static TestMessageMultiListener GetMultiListener() {
             return new TestMessageMultiListener();
         }
     }

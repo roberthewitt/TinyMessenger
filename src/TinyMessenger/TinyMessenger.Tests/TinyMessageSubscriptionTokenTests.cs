@@ -7,14 +7,11 @@ using TinyMessenger.Tests.TestData;
 using TinyMessenger;
 using System.Threading;
 
-namespace TinyMessenger.Tests
-{
+namespace TinyMessenger.Tests {
     [TestFixtureAttribute]
-    public class TinyMessageSubscriptionTokenTests
-    {
+    public class TinyMessageSubscriptionTokenTests {
         [TestAttribute]
-        public void Dispose_WithValidHubReference_UnregistersWithHub()
-        {
+        public void Dispose_WithValidHubReference_UnregistersWithHub() {
             var messengerMock = new Moq.Mock<ITinyMessengerHub>();
             messengerMock.Setup((messenger) => messenger.Unsubscribe<TestMessage>(Moq.It.IsAny<TinyMessageSubscriptionToken>())).Verifiable();
             var token = new TinyMessageSubscriptionToken(messengerMock.Object, typeof(TestMessage));
@@ -24,28 +21,25 @@ namespace TinyMessenger.Tests
             messengerMock.VerifyAll();
         }
 
-		[TestAttribute]
-        public void Dispose_WithInvalidHubReference_DoesNotThrow()
-        {
+        [TestAttribute]
+        public void Dispose_WithInvalidHubReference_DoesNotThrow() {
             var token = UtilityMethods.GetTokenWithOutOfScopeMessenger();
             GC.Collect();
-			Thread.Sleep(2000);
+            Thread.Sleep(2000);
 
             token.Dispose();
         }
 
-		[TestAttribute]
+        [TestAttribute]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void Ctor_NullHub_ThrowsArgumentNullException()
-        {
+        public void Ctor_NullHub_ThrowsArgumentNullException() {
             UtilityMethods.GetMessenger();
 
-			new TinyMessageSubscriptionToken(null, typeof(object));
+            new TinyMessageSubscriptionToken(null, typeof(object));
         }
 
-		[TestAttribute]
-        public void Ctor_ValidHubAndMessageType_DoesNotThrow()
-        {
+        [TestAttribute]
+        public void Ctor_ValidHubAndMessageType_DoesNotThrow() {
             var messenger = UtilityMethods.GetMessenger();
 
             new TinyMessageSubscriptionToken(messenger, typeof(TestMessage));
