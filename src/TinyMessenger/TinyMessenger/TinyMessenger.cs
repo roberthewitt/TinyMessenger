@@ -493,22 +493,26 @@ namespace TinyMessenger {
                 }
             }
 
-            if (_Listeners.ContainsKey(listener)) {
-                Unregister(listener);
+            lock (_SubscriptionsPadlock) {
+                if (_Listeners.ContainsKey(listener)) {
+                    Unregister(listener);
+                }
+                _Listeners.Add(listener, tokens);
             }
-            _Listeners.Add(listener, tokens);
         }
 
         public void Unregister(object listener) {
             if (listener == null)
                 throw new ArgumentNullException("listener");
 
-            List<TinyMessageSubscriptionToken> tokens = _Listeners[listener];
+            lock (_SubscriptionsPadlock) {
+                List<TinyMessageSubscriptionToken> tokens = _Listeners[listener];
 
-            foreach (var token in tokens) {
-                token.Dispose();
+                foreach (var token in tokens) {
+                    token.Dispose();
+                }
+                _Listeners.Remove(listener);
             }
-            _Listeners.Remove(listener);
         }
 
         Dictionary<Type, List<Action<object>>> FindAllSubscribeMethods(object listener) {
