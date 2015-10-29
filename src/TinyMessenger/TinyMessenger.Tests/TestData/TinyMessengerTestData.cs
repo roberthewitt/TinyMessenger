@@ -90,4 +90,13 @@ namespace TinyMessenger.Tests.TestData {
         public void OnAnInt(int number) {
         }
     }
+
+    public class MainThreadListener {
+        public TestMessage ReceivedTestMessage;
+
+        [Subscribe, MainThread]
+        public void OnTestMessageMain(TestMessage message) {
+            ReceivedTestMessage = message;
+        }
+    }
 }

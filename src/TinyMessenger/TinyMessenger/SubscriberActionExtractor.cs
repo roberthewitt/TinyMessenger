@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace TinyMessenger {
     internal static class SubscriberActionExtractor {
-        public static Dictionary<Type, List<SubscriberAction>> FindAll(object listener) {
+        public static Dictionary<Type, List<SubscriberAction>> FindAll(object listener, ITinyMessageProxy mainThreadProxy) {
             var result = new Dictionary<Type, List<SubscriberAction>>();
 
             foreach (MethodInfo method in GetMarkedMethods(listener)) {
@@ -31,6 +31,10 @@ namespace TinyMessenger {
                     subscriberActions = new List<SubscriberAction>();
                     subscriberActions.Add(subscriberAction);
                     result.Add(eventType, subscriberActions);
+                }
+
+                if (method.GetCustomAttribute(typeof(MainThread)) != null) {
+                    subscriberAction.Proxy = mainThreadProxy;
                 }
             }
 
