@@ -18,8 +18,8 @@ namespace TinyMessenger.Tests {
 
         [Test]
         public void Ctor_WithMessageDeliveryExceptionReporter_DoesNotThrow() {
-            IReportMessageDeliveryExceptions exceptionReporter = new MessageDeliveryExceptionReporter();
-            TinyMessengerHub hub = new TinyMessengerHub(exceptionReporter);
+            var exceptionReporter = new MessageDeliveryExceptionReporter();
+            var hub = new TinyMessengerHub(exceptionReporter);
 
             Assert.IsNotNull(hub);
         }
@@ -340,6 +340,18 @@ namespace TinyMessenger.Tests {
             messenger.Publish<TestMessage>(payload);
 
             Assert.AreSame(payload, listener.ReceivedTestMessage);
+        }
+
+        [Test]
+        public void Publish_ExceptionThrownByMessageHandler_PassedToExceptionReporter() {
+            var exceptionReporter = new MessageDeliveryExceptionReporter();
+            var hub = new TinyMessengerHub(exceptionReporter);
+            var listener = new ExceptionThrowingListener();
+
+            hub.Register(listener);
+            hub.Publish(new TestMessage());
+
+            Assert.IsNotNull(exceptionReporter.ReportedException);
         }
 
         [Test]

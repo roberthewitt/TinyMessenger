@@ -71,4 +71,11 @@ namespace TinyMessenger.Tests.TestData {
             ReportedException = exception;
         }
     }
+
+    public class ExceptionThrowingListener {
+        [Subscribe]
+        public void OnTestMessage(TestMessage message) {
+            throw new Exception();
+        }
+    }
 }

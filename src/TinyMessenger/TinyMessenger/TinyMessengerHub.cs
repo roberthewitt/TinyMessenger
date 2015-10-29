@@ -312,9 +312,10 @@ namespace TinyMessenger {
             foreach (SubscriptionItem sub in currentlySubscribed) {
                 try {
                     sub.Proxy.Deliver(message, sub.Subscription);
-                } catch (Exception) {
-                    // Ignore any errors and carry on
-                    // TODO - add to a list of erroring subs and remove them?
+                } catch (Exception exception) {
+                    if (_ExceptionReporter != null) {
+                        _ExceptionReporter.ReportException(exception);
+                    }
                 }
             }
         }
