@@ -6,6 +6,7 @@ using NUnit.Framework;
 using TinyMessenger.Tests.TestData;
 using TinyMessenger;
 using System.Threading;
+using Moq;
 
 namespace TinyMessenger.Tests {
 
@@ -555,6 +556,19 @@ namespace TinyMessenger.Tests {
             messenger.Publish(new InterfaceDerivedMessage<string>(this) { Things = "Hello" });
 
             Assert.IsTrue(received);
+        }
+
+        [Test]
+        public void Publish_SubscribedOnMainThread_MainThreadMessageProxyDoesDelivery() {
+            var messenger = UtilityMethods.GetMessenger();
+            var mockMainThreadMessageProxy = new Mock<ITinyMessageProxy>();
+            var message = new TestMessage();
+            messenger.MainThreadTinyMessageProxy = mockMainThreadMessageProxy.Object;
+
+            messenger.SubscribeOnMainThread<TestMessage>(tm => {});
+            messenger.Publish(message);
+
+            mockMainThreadMessageProxy.Verify(mockProxy => mockProxy.Deliver(message, It.IsAny<ITinyMessageSubscription>()), Times.Exactly(1));
         }
     }
 }

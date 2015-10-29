@@ -5,6 +5,9 @@ namespace TinyMessenger {
     /// Messenger hub responsible for taking subscriptions/publications and delivering of messages.
     /// </summary>
     public interface ITinyMessengerHub {
+        // Set the main thread proxy
+        ITinyMessageProxy MainThreadTinyMessageProxy { get; set; }
+
         /// <summary>
         /// Subscribe an object to all events that it subscribes to with the [Subscribe] method attribute
         /// 
@@ -23,6 +26,19 @@ namespace TinyMessenger {
         /// <param name="deliveryAction">Action to invoke when message is delivered</param>
         /// <returns>TinyMessageSubscription used to unsubscribing</returns>
         TinyMessageSubscriptionToken Subscribe<TMessage>(Action<TMessage> deliveryAction) where TMessage : class;
+
+        /// <summary>
+        /// Subscribe to a message type with the given destination and delivery action, on the main thread.
+        /// All references are held with WeakReferences
+        /// 
+        /// Set MainThreadTinyMessageProxy before using this method
+        /// 
+        /// All messages of this type will be delivered.
+        /// </summary>
+        /// <typeparam name="TMessage">Type of message</typeparam>
+        /// <param name="deliveryAction">Action to invoke when message is delivered</param>
+        /// <returns>TinyMessageSubscription used to unsubscribing</returns>
+        TinyMessageSubscriptionToken SubscribeOnMainThread<TMessage>(Action<TMessage> deliveryAction) where TMessage : class;
 
         /// <summary>
         /// Subscribe to a message type with the given destination and delivery action.
@@ -119,7 +135,6 @@ namespace TinyMessenger {
         /// <typeparam name="TMessage">Type of message</typeparam>
         /// <param name="subscriptionToken">Subscription token received from Subscribe</param>
         void Unsubscribe<TMessage>(TinyMessageSubscriptionToken subscriptionToken) where TMessage : class;
-
 
         /// <summary>
         /// Unsubscribe an object from all events that it was subscribed to via Register

@@ -27,6 +27,8 @@ namespace TinyMessenger {
 
         #region Public API
 
+        public ITinyMessageProxy MainThreadTinyMessageProxy { get; set; }
+
         public TinyMessengerHub() : this(null) {
         }
 
@@ -89,6 +91,10 @@ namespace TinyMessenger {
 
         public TinyMessageSubscriptionToken Subscribe<TMessage>(Action<TMessage> deliveryAction) where TMessage : class {
             return AddSubscriptionInternal<TMessage>(deliveryAction, (m) => true, true, DefaultTinyMessageProxy.Instance);
+        }
+
+        public TinyMessageSubscriptionToken SubscribeOnMainThread<TMessage>(Action<TMessage> deliveryAction) where TMessage : class {
+            return AddSubscriptionInternal<TMessage>(deliveryAction, (m) => true, true, MainThreadTinyMessageProxy);
         }
 
         public TinyMessageSubscriptionToken Subscribe<TMessage>(Action<TMessage> deliveryAction, ITinyMessageProxy proxy) where TMessage : class {
