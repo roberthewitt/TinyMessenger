@@ -469,6 +469,9 @@ namespace TinyMessenger {
         #region Public API
 
         public void Register(object listener) {
+            if (listener == null)
+                throw new ArgumentNullException("listener");
+            
             Dictionary<Type, List<Action<object>>> methodsInSubscriber = FindAllSubscribeMethods(listener);
             List<TinyMessageSubscriptionToken> tokens = new List<TinyMessageSubscriptionToken>();
 

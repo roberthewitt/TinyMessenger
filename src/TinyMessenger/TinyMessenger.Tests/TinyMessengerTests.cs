@@ -174,6 +174,14 @@ namespace TinyMessenger.Tests {
         }
 
         [Test]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void Register_NulListener_Throws() {
+            var messenger = UtilityMethods.GetMessenger();
+
+            messenger.Register(null);
+        }
+
+        [Test]
         public void Publish_CustomProxyNoFilter_UsesCorrectProxy() {
             var messenger = UtilityMethods.GetMessenger();
             var proxy = new TestProxy();
