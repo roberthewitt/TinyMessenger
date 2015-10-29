@@ -60,4 +60,22 @@ namespace TinyMessenger.Tests.TestData
             ReceivedTestMessage = message;
         }
     }
+
+    public class TestMessageMultiListener
+    {
+        public TestMessage ReceivedMessageOne;
+        public DerivedMessage<string> ReceivedMessageTwo;
+
+        [Subscribe]
+        public void OnMessageOne(TestMessage message)
+        {
+            ReceivedMessageOne = message;
+        }
+
+        [Subscribe]
+        public void OnMessageTwo(DerivedMessage<string> message)
+        {
+            ReceivedMessageTwo = message;
+        }
+    }
 }

@@ -98,6 +98,19 @@ namespace TinyMessenger.Tests
             messenger.Unsubscribe<TestMessage>(subscription);
         }
 
+        [Test]
+        public void Unregister_ListenerWithAnnotatedMethod_ListenerDoesNotReceivePostedMessage() {
+            var messenger = UtilityMethods.GetMessenger();
+            var listener = UtilityMethods.GetListener();
+            var payload = new TestMessage();
+
+            messenger.Register(listener);
+            messenger.Unregister(listener);
+            messenger.Publish<TestMessage>(payload);
+
+            Assert.IsNull(listener.ReceivedTestMessage);
+        }
+
 		[Test]
         public void Subscribe_PreviousSubscription_ReturnsDifferentSubscriptionObject()
         {
@@ -145,17 +158,43 @@ namespace TinyMessenger.Tests
         }
 
         [Test]
-        public void Subscribe_ListenerWithAnnotatedMethod_ReturnsRegistrationMap()
+        public void Register_ListenerWithAnnotatedMethod_DoesNotThrow()
         {
             var messenger = UtilityMethods.GetMessenger();
             var listener = UtilityMethods.GetListener();
 
-            var output = messenger.Subscribe(listener);
-
-            Assert.That(output, Is.InstanceOf< List<TinyMessageSubscriptionToken> >());
+            messenger.Register(listener);
         }
 
-		[Test]
+        [Test]
+        public void Register_ListenerWithMultipleAnnotatedMethods_DoesNotThrow()
+        {
+            var messenger = UtilityMethods.GetMessenger();
+            var listener = new Object();
+
+            messenger.Register(listener);
+        }
+
+        [Test]
+        public void Register_ListenerWithNoAnnotatedMethods_DoesNotThrow()
+        {
+            var messenger = UtilityMethods.GetMessenger();
+            var listener = new Object();
+
+            messenger.Register(listener);
+        }
+
+        [Test]
+        public void Register_ListenerTwice_DoesNotThrow()
+        {
+            var messenger = UtilityMethods.GetMessenger();
+            var listener = UtilityMethods.GetListener();
+
+            messenger.Register(listener);
+            messenger.Register(listener);
+        }
+
+        [Test]
         public void Publish_CustomProxyNoFilter_UsesCorrectProxy()
         {
             var messenger = UtilityMethods.GetMessenger();
@@ -284,12 +323,12 @@ namespace TinyMessenger.Tests
         }
 
         [Test]
-        public void Publish_SubscribedListenerWithAnnotatedMethod_SubscribedMethodGetsActualMessage()
+        public void Publish_RegisteredListenerWithAnnotatedMethod_SubscribedMethodGetsActualMessage()
         {
             var messenger = UtilityMethods.GetMessenger();
             var listener = UtilityMethods.GetListener();
             var payload = new TestMessage();
-            messenger.Subscribe(listener);
+            messenger.Register(listener);
 
             messenger.Publish<TestMessage>(payload);
 

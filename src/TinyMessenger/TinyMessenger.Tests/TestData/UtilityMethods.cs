@@ -51,5 +51,10 @@ namespace TinyMessenger.Tests.TestData
         {
             return new TestMessageListener();
         }
+
+        public static TestMessageMultiListener GetMultiListener()
+        {
+            return new TestMessageMultiListener();
+        }
     }
 }

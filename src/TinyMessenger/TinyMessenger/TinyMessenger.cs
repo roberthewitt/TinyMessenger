@@ -212,14 +212,12 @@ namespace TinyMessenger
     public interface ITinyMessengerHub
     {
         /// <summary>
-        /// Subscribe an object to all event types that it subscribes to. An object subscribes to an event
-        /// by annotating a method with the [Subscribe] attribute, the parameter of the method indicating the event type to listen for.
+        /// Subscribe an object to all events that it subscribes to with the [Subscribe] method attribute
         /// 
         /// </summary>
         /// <param name="listener">Object that is listening for events. The hub will keep a reference to this object until
-        /// Unsubscribe is called with this object</param>
-        /// <returns>A list of subscription tokens that can be used to unsubscribe from individual</returns>
-        IList<TinyMessageSubscriptionToken> Subscribe(object listener);
+        /// Unregister is called with this listener</param>
+        void Register(object listener);
 
         /// <summary>
         /// Subscribe to a message type with the given destination and delivery action.
@@ -327,6 +325,15 @@ namespace TinyMessenger
         /// <typeparam name="TMessage">Type of message</typeparam>
         /// <param name="subscriptionToken">Subscription token received from Subscribe</param>
         void Unsubscribe<TMessage>(TinyMessageSubscriptionToken subscriptionToken) where TMessage : class;
+
+
+        /// <summary>
+        /// Unsubscribe an object from all events that it was subscribed to via Register
+        /// 
+        /// Does not throw an exception if the object was not registered
+        /// </summary>
+        /// <param name="listener">An object that has been registered for events</param>
+        void Unregister(object listener);
 
         /// <summary>
         /// Publish a message to any subscribers
@@ -486,37 +493,50 @@ namespace TinyMessenger
 
         private readonly object _SubscriptionsPadlock = new object();
         private readonly List<SubscriptionItem> _Subscriptions = new List<SubscriptionItem>();
+        private readonly Dictionary<object, List<TinyMessageSubscriptionToken>> _Listeners = new Dictionary<object, List<TinyMessageSubscriptionToken>>();
         #endregion
 
         #region Public API
 
-        public IList<TinyMessageSubscriptionToken> Subscribe(object listener)
+        public void Register(object listener)
         {
-            Dictionary<Type, List<Action<object>>> methodsInSubscriber = FindAllHandlers(listener);
+            Dictionary<Type, List<Action<object>>> methodsInSubscriber = FindAllSubscribeMethods(listener);
             List<TinyMessageSubscriptionToken> tokens = new List<TinyMessageSubscriptionToken>();
 
             foreach (var key in methodsInSubscriber.Keys) {
                 List<Action<object>> actions = methodsInSubscriber[key];
 
                 foreach (var action in actions) {
-                    IEnumerable<MethodInfo> subscribeInternalMethods = this.GetType().GetRuntimeMethods().Where<MethodInfo>((method) =>
-                        {
-                            String name = method.Name;
-                            return name == "AddSubscriptionInternal" ? true : false;
-                        });
-                    MethodInfo subscribeInternalMethod = subscribeInternalMethods.First();
-                    Func<object, bool> messageFilter = (m) => true;
-                    subscribeInternalMethod = subscribeInternalMethod.MakeGenericMethod(key);
-                    TinyMessageSubscriptionToken token = (TinyMessageSubscriptionToken)subscribeInternalMethod.Invoke(this, new object[] {action, messageFilter, true, DefaultTinyMessageProxy.Instance});
+                    var subscribeInternalMethod = MakeGenericSubscribeInternalMethodWithType(key);
+                    Func<object, bool> allowAllMessageFilter = (m) => true;
+                    var subscribeInternalArguments = new object[] {
+                        action, 
+                        allowAllMessageFilter, 
+                        true, 
+                        DefaultTinyMessageProxy.Instance
+                    };
+                    TinyMessageSubscriptionToken token = (TinyMessageSubscriptionToken)subscribeInternalMethod.Invoke(this, subscribeInternalArguments);
 
                     tokens.Add(token);
                 }
             }
 
-            return tokens;
+            if (_Listeners.ContainsKey(listener)) {
+                Unregister(listener);
+            }
+            _Listeners.Add(listener, tokens);
         }
 
-        Dictionary<Type, List<Action<object>>> FindAllHandlers(object listener) {
+        public void Unregister(object listener) {
+            List<TinyMessageSubscriptionToken> tokens = _Listeners[listener];
+
+            foreach (var token in tokens) {
+                token.Dispose();
+            }
+            _Listeners.Remove(listener);
+        }
+
+        Dictionary<Type, List<Action<object>>> FindAllSubscribeMethods(object listener) {
             var result = new Dictionary<Type, List<Action<object>>>();
 
             foreach (MethodInfo method in GetMarkedMethods(listener))
@@ -534,10 +554,16 @@ namespace TinyMessenger
                     actions.Add(action);
                     result.Add(eventType, actions);
                 }
-
             }
 
             return result;
+        }
+
+        MethodInfo MakeGenericSubscribeInternalMethodWithType(Type genericType) {
+            IEnumerable<MethodInfo> subscribeInternalMethods = this.GetType().GetRuntimeMethods().Where<MethodInfo>(method =>  {
+                return method.Name == "AddSubscriptionInternal" ? true : false;
+            });
+            return subscribeInternalMethods.First().MakeGenericMethod(genericType);
         }
 
         private IEnumerable<MethodInfo> GetMarkedMethods(object listener)
