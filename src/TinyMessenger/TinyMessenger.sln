@@ -32,6 +32,7 @@ Global
 		$2.inheritsSet = null
 		$2.scope = text/x-csharp
 		$0.CSharpFormattingPolicy = $3
+		$3.IndentBlocksInsideExpressions = True
 		$3.NamespaceBraceStyle = EndOfLine
 		$3.ClassBraceStyle = EndOfLine
 		$3.InterfaceBraceStyle = EndOfLine
