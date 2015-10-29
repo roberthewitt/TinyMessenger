@@ -63,4 +63,12 @@ namespace TinyMessenger.Tests.TestData {
             ReceivedMessageTwo = message;
         }
     }
+
+    public class MessageDeliveryExceptionReporter : IReportMessageDeliveryExceptions {
+        public Exception ReportedException;
+
+        public void ReportException(Exception exception) {
+            ReportedException = exception;
+        }
+    }
 }

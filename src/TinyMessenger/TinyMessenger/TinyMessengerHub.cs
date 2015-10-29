@@ -23,8 +23,16 @@ namespace TinyMessenger {
         private readonly object _SubscriptionsPadlock = new object();
         private readonly List<SubscriptionItem> _Subscriptions = new List<SubscriptionItem>();
         private readonly Dictionary<object, List<TinyMessageSubscriptionToken>> _Listeners = new Dictionary<object, List<TinyMessageSubscriptionToken>>();
+        private readonly IReportMessageDeliveryExceptions _ExceptionReporter;
 
         #region Public API
+
+        public TinyMessengerHub() : this(null) {
+        }
+
+        public TinyMessengerHub(IReportMessageDeliveryExceptions exceptionReporter) {
+            _ExceptionReporter = exceptionReporter;
+        }
 
         public void Register(object listener) {
             if (listener == null) {

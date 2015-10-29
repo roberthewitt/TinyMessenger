@@ -42,6 +42,7 @@
     <Compile Include="TinyMessengerSubscriptionException.cs" />
     <Compile Include="ITinyMessengerHub.cs" />
     <Compile Include="TinyMessengerHub.cs" />
+    <Compile Include="IReportMessageDeliveryExceptions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
 </Project>

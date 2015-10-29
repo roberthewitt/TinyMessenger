@@ -17,6 +17,14 @@ namespace TinyMessenger.Tests {
         }
 
         [Test]
+        public void Ctor_WithMessageDeliveryExceptionReporter_DoesNotThrow() {
+            IReportMessageDeliveryExceptions exceptionReporter = new MessageDeliveryExceptionReporter();
+            TinyMessengerHub hub = new TinyMessengerHub(exceptionReporter);
+
+            Assert.IsNotNull(hub);
+        }
+
+        [Test]
         public void Subscribe_ValidDeliverAction_DoesNotThrow() {
             var messenger = UtilityMethods.GetMessenger();
 
