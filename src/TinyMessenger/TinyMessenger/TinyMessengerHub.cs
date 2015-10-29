@@ -23,136 +23,16 @@ namespace TinyMessenger {
     /// Messenger hub responsible for taking subscriptions/publications and delivering of messages.
     /// </summary>
     public sealed class TinyMessengerHub : ITinyMessengerHub {
-        #region Private Types and Interfaces
-
-        private class WeakTinyMessageSubscription<TMessage> : ITinyMessageSubscription
-            where TMessage : class {
-            protected TinyMessageSubscriptionToken _SubscriptionToken;
-            protected WeakReference _DeliveryAction;
-            protected WeakReference _MessageFilter;
-
-            public TinyMessageSubscriptionToken SubscriptionToken {
-                get { return _SubscriptionToken; }
-            }
-
-            public bool ShouldAttemptDelivery(object message) {
-                if (!(message is TMessage))
-                    return false;
-
-                if (!_DeliveryAction.IsAlive)
-                    return false;
-
-                if (!_MessageFilter.IsAlive)
-                    return false;
-
-                return ((Func<TMessage, bool>)_MessageFilter.Target).Invoke(message as TMessage);
-            }
-
-            public void Deliver(object message) {
-                if (!(message is TMessage))
-                    throw new ArgumentException("Message is not the correct type");
-
-                if (!_DeliveryAction.IsAlive)
-                    return;
-
-                ((Action<TMessage>)_DeliveryAction.Target).Invoke(message as TMessage);
-            }
-
-            /// <summary>
-            /// Initializes a new instance of the WeakTinyMessageSubscription class.
-            /// </summary>
-            /// <param name="destination">Destination object</param>
-            /// <param name="deliveryAction">Delivery action</param>
-            /// <param name="messageFilter">Filter function</param>
-            public WeakTinyMessageSubscription(TinyMessageSubscriptionToken subscriptionToken, Action<TMessage> deliveryAction, Func<TMessage, bool> messageFilter) {
-                if (subscriptionToken == null)
-                    throw new ArgumentNullException("subscriptionToken");
-
-                if (deliveryAction == null)
-                    throw new ArgumentNullException("deliveryAction");
-
-                if (messageFilter == null)
-                    throw new ArgumentNullException("messageFilter");
-
-                _SubscriptionToken = subscriptionToken;
-                _DeliveryAction = new WeakReference(deliveryAction);
-                _MessageFilter = new WeakReference(messageFilter);
-            }
-        }
-
-        private class StrongTinyMessageSubscription<TMessage> : ITinyMessageSubscription
-            where TMessage : class {
-            protected TinyMessageSubscriptionToken _SubscriptionToken;
-            protected Action<TMessage> _DeliveryAction;
-            protected Func<TMessage, bool> _MessageFilter;
-
-            public TinyMessageSubscriptionToken SubscriptionToken {
-                get { return _SubscriptionToken; }
-            }
-
-            public bool ShouldAttemptDelivery(object message) {
-                if (!(message is TMessage))
-                    return false;
-
-                return _MessageFilter.Invoke(message as TMessage);
-            }
-
-            public void Deliver(object message) {
-                if (!(message is TMessage))
-                    throw new ArgumentException("Message is not the correct type");
-
-                _DeliveryAction.Invoke(message as TMessage);
-            }
-
-            /// <summary>
-            /// Initializes a new instance of the TinyMessageSubscription class.
-            /// </summary>
-            /// <param name="destination">Destination object</param>
-            /// <param name="deliveryAction">Delivery action</param>
-            /// <param name="messageFilter">Filter function</param>
-            public StrongTinyMessageSubscription(TinyMessageSubscriptionToken subscriptionToken, Action<TMessage> deliveryAction, Func<TMessage, bool> messageFilter) {
-                if (subscriptionToken == null)
-                    throw new ArgumentNullException("subscriptionToken");
-
-                if (deliveryAction == null)
-                    throw new ArgumentNullException("deliveryAction");
-
-                if (messageFilter == null)
-                    throw new ArgumentNullException("messageFilter");
-
-                _SubscriptionToken = subscriptionToken;
-                _DeliveryAction = deliveryAction;
-                _MessageFilter = messageFilter;
-            }
-        }
-
-        #endregion
-
-        #region Subscription dictionary
-
-        private class SubscriptionItem {
-            public ITinyMessageProxy Proxy { get; private set; }
-
-            public ITinyMessageSubscription Subscription { get; private set; }
-
-            public SubscriptionItem(ITinyMessageProxy proxy, ITinyMessageSubscription subscription) {
-                Proxy = proxy;
-                Subscription = subscription;
-            }
-        }
-
         private readonly object _SubscriptionsPadlock = new object();
         private readonly List<SubscriptionItem> _Subscriptions = new List<SubscriptionItem>();
         private readonly Dictionary<object, List<TinyMessageSubscriptionToken>> _Listeners = new Dictionary<object, List<TinyMessageSubscriptionToken>>();
-
-        #endregion
 
         #region Public API
 
         public void Register(object listener) {
             if (listener == null)
                 throw new ArgumentNullException("listener");
-            
+
             Dictionary<Type, List<Action<object>>> methodsInSubscriber = FindAllSubscribeMethods(listener);
             List<TinyMessageSubscriptionToken> tokens = new List<TinyMessageSubscriptionToken>();
 
@@ -199,45 +79,6 @@ namespace TinyMessenger {
                 }
                 _Listeners.Remove(listener);
             }
-        }
-
-        Dictionary<Type, List<Action<object>>> FindAllSubscribeMethods(object listener) {
-            var result = new Dictionary<Type, List<Action<object>>>();
-
-            foreach (MethodInfo method in GetMarkedMethods(listener)) {
-                ParameterInfo[] parmetersTypes = method.GetParameters();
-                Type eventType = parmetersTypes[0].ParameterType;
-                Action<object> action = (e) => {
-                    method.Invoke(listener, new object[] { e });
-                };
-                List<Action<object>> actions = null;
-
-                if (result.ContainsKey(eventType)) {
-                    actions = result[eventType];
-                    actions.Add(action);
-                } else {
-                    actions = new List<Action<object>>();
-                    actions.Add(action);
-                    result.Add(eventType, actions);
-                }
-            }
-
-            return result;
-        }
-
-        MethodInfo MakeGenericSubscribeInternalMethodWithType(Type genericType) {
-            IEnumerable<MethodInfo> subscribeInternalMethods = this.GetType().GetRuntimeMethods().Where<MethodInfo>(method => {
-                    return method.Name == "AddSubscriptionInternal" ? true : false;
-                });
-            return subscribeInternalMethods.First().MakeGenericMethod(genericType);
-        }
-
-        private IEnumerable<MethodInfo> GetMarkedMethods(object listener) {
-            Type typeOfClass = listener.GetType();
-            return typeOfClass.GetRuntimeMethods().Where<MethodInfo>((method) => {
-                    Attribute attribute = method.GetCustomAttribute(typeof(Subscribe));
-                    return attribute == null ? false : true;
-                });
         }
 
         /// <summary>
@@ -395,6 +236,122 @@ namespace TinyMessenger {
 
         #endregion
 
+        #region Private Types and Interfaces
+
+        private class WeakTinyMessageSubscription<TMessage> : ITinyMessageSubscription
+            where TMessage : class {
+            protected TinyMessageSubscriptionToken _SubscriptionToken;
+            protected WeakReference _DeliveryAction;
+            protected WeakReference _MessageFilter;
+
+            public TinyMessageSubscriptionToken SubscriptionToken {
+                get { return _SubscriptionToken; }
+            }
+
+            public bool ShouldAttemptDelivery(object message) {
+                if (!(message is TMessage))
+                    return false;
+
+                if (!_DeliveryAction.IsAlive)
+                    return false;
+
+                if (!_MessageFilter.IsAlive)
+                    return false;
+
+                return ((Func<TMessage, bool>)_MessageFilter.Target).Invoke(message as TMessage);
+            }
+
+            public void Deliver(object message) {
+                if (!(message is TMessage))
+                    throw new ArgumentException("Message is not the correct type");
+
+                if (!_DeliveryAction.IsAlive)
+                    return;
+
+                ((Action<TMessage>)_DeliveryAction.Target).Invoke(message as TMessage);
+            }
+
+            /// <summary>
+            /// Initializes a new instance of the WeakTinyMessageSubscription class.
+            /// </summary>
+            /// <param name="destination">Destination object</param>
+            /// <param name="deliveryAction">Delivery action</param>
+            /// <param name="messageFilter">Filter function</param>
+            public WeakTinyMessageSubscription(TinyMessageSubscriptionToken subscriptionToken, Action<TMessage> deliveryAction, Func<TMessage, bool> messageFilter) {
+                if (subscriptionToken == null)
+                    throw new ArgumentNullException("subscriptionToken");
+
+                if (deliveryAction == null)
+                    throw new ArgumentNullException("deliveryAction");
+
+                if (messageFilter == null)
+                    throw new ArgumentNullException("messageFilter");
+
+                _SubscriptionToken = subscriptionToken;
+                _DeliveryAction = new WeakReference(deliveryAction);
+                _MessageFilter = new WeakReference(messageFilter);
+            }
+        }
+
+        private class StrongTinyMessageSubscription<TMessage> : ITinyMessageSubscription
+            where TMessage : class {
+            protected TinyMessageSubscriptionToken _SubscriptionToken;
+            protected Action<TMessage> _DeliveryAction;
+            protected Func<TMessage, bool> _MessageFilter;
+
+            public TinyMessageSubscriptionToken SubscriptionToken {
+                get { return _SubscriptionToken; }
+            }
+
+            public bool ShouldAttemptDelivery(object message) {
+                if (!(message is TMessage))
+                    return false;
+
+                return _MessageFilter.Invoke(message as TMessage);
+            }
+
+            public void Deliver(object message) {
+                if (!(message is TMessage))
+                    throw new ArgumentException("Message is not the correct type");
+
+                _DeliveryAction.Invoke(message as TMessage);
+            }
+
+            /// <summary>
+            /// Initializes a new instance of the TinyMessageSubscription class.
+            /// </summary>
+            /// <param name="destination">Destination object</param>
+            /// <param name="deliveryAction">Delivery action</param>
+            /// <param name="messageFilter">Filter function</param>
+            public StrongTinyMessageSubscription(TinyMessageSubscriptionToken subscriptionToken, Action<TMessage> deliveryAction, Func<TMessage, bool> messageFilter) {
+                if (subscriptionToken == null)
+                    throw new ArgumentNullException("subscriptionToken");
+
+                if (deliveryAction == null)
+                    throw new ArgumentNullException("deliveryAction");
+
+                if (messageFilter == null)
+                    throw new ArgumentNullException("messageFilter");
+
+                _SubscriptionToken = subscriptionToken;
+                _DeliveryAction = deliveryAction;
+                _MessageFilter = messageFilter;
+            }
+        }
+
+        private class SubscriptionItem {
+            public ITinyMessageProxy Proxy { get; private set; }
+
+            public ITinyMessageSubscription Subscription { get; private set; }
+
+            public SubscriptionItem(ITinyMessageProxy proxy, ITinyMessageSubscription subscription) {
+                Proxy = proxy;
+                Subscription = subscription;
+            }
+        }
+
+        #endregion
+
         #region Internal Methods
 
         private TinyMessageSubscriptionToken AddSubscriptionInternal<TMessage>(Action<TMessage> deliveryAction, Func<TMessage, bool> messageFilter, bool strongReference, ITinyMessageProxy proxy)
@@ -467,6 +424,45 @@ namespace TinyMessenger {
             };
 
             publishAction.BeginInvoke(callback, null);
+        }
+
+        private Dictionary<Type, List<Action<object>>> FindAllSubscribeMethods(object listener) {
+            var result = new Dictionary<Type, List<Action<object>>>();
+
+            foreach (MethodInfo method in GetMarkedMethods(listener)) {
+                ParameterInfo[] parmetersTypes = method.GetParameters();
+                Type eventType = parmetersTypes[0].ParameterType;
+                Action<object> action = (e) => {
+                    method.Invoke(listener, new object[] { e });
+                };
+                List<Action<object>> actions = null;
+
+                if (result.ContainsKey(eventType)) {
+                    actions = result[eventType];
+                    actions.Add(action);
+                } else {
+                    actions = new List<Action<object>>();
+                    actions.Add(action);
+                    result.Add(eventType, actions);
+                }
+            }
+
+            return result;
+        }
+
+        private MethodInfo MakeGenericSubscribeInternalMethodWithType(Type genericType) {
+            IEnumerable<MethodInfo> subscribeInternalMethods = this.GetType().GetRuntimeMethods().Where<MethodInfo>(method => {
+                return method.Name == "AddSubscriptionInternal" ? true : false;
+            });
+            return subscribeInternalMethods.First().MakeGenericMethod(genericType);
+        }
+
+        private IEnumerable<MethodInfo> GetMarkedMethods(object listener) {
+            Type typeOfClass = listener.GetType();
+            return typeOfClass.GetRuntimeMethods().Where<MethodInfo>((method) => {
+                Attribute attribute = method.GetCustomAttribute(typeof(Subscribe));
+                return attribute == null ? false : true;
+            });
         }
 
         #endregion
