@@ -500,6 +500,9 @@ namespace TinyMessenger {
         }
 
         public void Unregister(object listener) {
+            if (listener == null)
+                throw new ArgumentNullException("listener");
+
             List<TinyMessageSubscriptionToken> tokens = _Listeners[listener];
 
             foreach (var token in tokens) {

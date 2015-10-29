@@ -100,6 +100,14 @@ namespace TinyMessenger.Tests {
         }
 
         [Test]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void Unregister_NulListener_Throws() {
+            var messenger = UtilityMethods.GetMessenger();
+
+            messenger.Unregister(null);
+        }
+
+        [Test]
         public void Subscribe_PreviousSubscription_ReturnsDifferentSubscriptionObject() {
             var messenger = UtilityMethods.GetMessenger();
             var sub1 = messenger.Subscribe<TestMessage>(new Action<TestMessage>(UtilityMethods.FakeDeliveryAction<TestMessage>), new Func<TestMessage, bool>(UtilityMethods.FakeMessageFilter<TestMessage>));
