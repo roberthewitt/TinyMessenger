@@ -610,5 +610,14 @@ namespace TinyMessenger.Tests {
 
             messenger.SubscribeOnMainThread<TestMessage>(tm => {});
         }
+
+        [Test]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void Register_WithSubscribeOnMainThreadButMainThreadMessageProxyIsNull_Throws() {
+            var messenger = UtilityMethods.GetMessenger();
+            var listener = new MainThreadListener();
+
+            messenger.Register(listener);
+        }
     }
 }

@@ -34,6 +34,9 @@ namespace TinyMessenger {
                 }
 
                 if (method.GetCustomAttribute(typeof(MainThread)) != null) {
+                    if (mainThreadProxy == null) {
+                        throw new InvalidOperationException("Set MainThreadTinyMessageProxy before Registering a class that Subscribes on the MainThread");
+                    }
                     subscriberAction.Proxy = mainThreadProxy;
                 }
             }
