@@ -343,6 +343,15 @@ namespace TinyMessenger.Tests {
         }
 
         [Test]
+        public void Publish_ExceptionThrownByMessageHandler_DoesNotThrow() {
+            var hub = UtilityMethods.GetMessenger();
+            var listener = new ExceptionThrowingListener();
+
+            hub.Register(listener);
+            hub.Publish(new TestMessage());
+        }
+
+        [Test]
         public void Publish_ExceptionThrownByMessageHandler_PassedToExceptionReporter() {
             var exceptionReporter = new MessageDeliveryExceptionReporter();
             var hub = new TinyMessengerHub(exceptionReporter);
