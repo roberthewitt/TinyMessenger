@@ -84,4 +84,10 @@ namespace TinyMessenger.Tests.TestData {
         public void OnNoMessage() {
         }
     }
+
+    public class ListenerWithASubscriptionMethodWithAPrimitiveArgument {
+        [Subscribe]
+        public void OnAnInt(int number) {
+        }
+    }
 }

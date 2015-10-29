@@ -216,6 +216,15 @@ namespace TinyMessenger.Tests {
         }
 
         [Test]
+        [ExpectedException(typeof(ArgumentException))]
+        public void Register_ListenerWithASubscriptionMethodWithAPrimitiveArgument_Throws() {
+            var messenger = UtilityMethods.GetMessenger();
+            var listener = new ListenerWithASubscriptionMethodWithAPrimitiveArgument();
+
+            messenger.Register(listener);
+        }
+
+        [Test]
         public void Publish_CustomProxyNoFilter_UsesCorrectProxy() {
             var messenger = UtilityMethods.GetMessenger();
             var proxy = new TestProxy();

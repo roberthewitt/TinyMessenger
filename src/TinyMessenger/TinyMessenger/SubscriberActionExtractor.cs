@@ -15,6 +15,9 @@ namespace TinyMessenger {
                     throw new ArgumentException("listener has a Subscribe method without arguments");
                 }
                 Type eventType = parmetersTypes[0].ParameterType;
+                if (!eventType.GetTypeInfo().IsClass) {
+                    throw new ArgumentException("listener has a Subscribe method with a non-class argument");
+                }
                 Action<object> action = (e) => {
                     method.Invoke(listener, new object[] { e });
                 };
