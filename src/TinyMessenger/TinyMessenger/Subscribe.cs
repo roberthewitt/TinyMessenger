@@ -15,7 +15,7 @@ namespace TinyMessenger {
     ///     }
     /// }
     /// </example>
-    /// NB: The method must have one and only one parameter, and its type determines the event type.
+    /// NB: The method must have only one parameter, and its type determines the event type.
     /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = false)]
     public class Subscribe : Attribute {

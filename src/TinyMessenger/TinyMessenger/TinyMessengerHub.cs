@@ -25,6 +25,11 @@ namespace TinyMessenger {
         private readonly Dictionary<object, List<TinyMessageSubscriptionToken>> _Listeners = new Dictionary<object, List<TinyMessageSubscriptionToken>>();
         private readonly IReportMessageDeliveryExceptions _ExceptionReporter;
 
+        private class SubscriberAction {
+            public Action<object> Action = null;
+            public ITinyMessageProxy Proxy = DefaultTinyMessageProxy.Instance;
+        }
+
         #region Public API
 
         public ITinyMessageProxy MainThreadTinyMessageProxy { get; set; }
@@ -41,20 +46,20 @@ namespace TinyMessenger {
                 throw new ArgumentNullException("listener");
             }
 
-            Dictionary<Type, List<Action<object>>> methodsInSubscriber = FindAllSubscribeMethods(listener);
+            Dictionary<Type, List<SubscriberAction>> methodsInSubscriber = FindAllSubscribeMethods(listener);
             List<TinyMessageSubscriptionToken> tokens = new List<TinyMessageSubscriptionToken>();
 
             foreach (var key in methodsInSubscriber.Keys) {
-                List<Action<object>> actions = methodsInSubscriber[key];
+                List<SubscriberAction> subscriberActions = methodsInSubscriber[key];
 
-                foreach (var action in actions) {
+                foreach (var subscriberAction in subscriberActions) {
                     var subscribeInternalMethod = MakeGenericSubscribeInternalMethodWithType(key);
                     Func<object, bool> allowAllMessageFilter = (m) => true;
                     var subscribeInternalArguments = new object[] {
-                        action, 
+                        subscriberAction.Action, 
                         allowAllMessageFilter, 
                         true, 
-                        DefaultTinyMessageProxy.Instance
+                        subscriberAction.Proxy
                     };
                     TinyMessageSubscriptionToken token = (TinyMessageSubscriptionToken)subscribeInternalMethod.Invoke(this, subscribeInternalArguments);
 
@@ -334,8 +339,8 @@ namespace TinyMessenger {
             publishAction.BeginInvoke(callback, null);
         }
 
-        private Dictionary<Type, List<Action<object>>> FindAllSubscribeMethods(object listener) {
-            var result = new Dictionary<Type, List<Action<object>>>();
+        private Dictionary<Type, List<SubscriberAction>> FindAllSubscribeMethods(object listener) {
+            var result = new Dictionary<Type, List<SubscriberAction>>();
 
             foreach (MethodInfo method in GetMarkedMethods(listener)) {
                 ParameterInfo[] parmetersTypes = method.GetParameters();
@@ -343,15 +348,16 @@ namespace TinyMessenger {
                 Action<object> action = (e) => {
                     method.Invoke(listener, new object[] { e });
                 };
-                List<Action<object>> actions = null;
+                List<SubscriberAction> subscriberActions = null;
+                SubscriberAction subscriberAction = new SubscriberAction() { Action = action };
 
                 if (result.ContainsKey(eventType)) {
-                    actions = result[eventType];
-                    actions.Add(action);
+                    subscriberActions = result[eventType];
+                    subscriberActions.Add(subscriberAction);
                 } else {
-                    actions = new List<Action<object>>();
-                    actions.Add(action);
-                    result.Add(eventType, actions);
+                    subscriberActions = new List<SubscriberAction>();
+                    subscriberActions.Add(subscriberAction);
+                    result.Add(eventType, subscriberActions);
                 }
             }
 
