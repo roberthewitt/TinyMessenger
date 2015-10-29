@@ -25,11 +25,6 @@ namespace TinyMessenger {
         private readonly Dictionary<object, List<TinyMessageSubscriptionToken>> _Listeners = new Dictionary<object, List<TinyMessageSubscriptionToken>>();
         private readonly IReportMessageDeliveryExceptions _ExceptionReporter;
 
-        private class SubscriberAction {
-            public Action<object> Action = null;
-            public ITinyMessageProxy Proxy = DefaultTinyMessageProxy.Instance;
-        }
-
         #region Public API
 
         public ITinyMessageProxy MainThreadTinyMessageProxy { get; set; }
@@ -46,7 +41,7 @@ namespace TinyMessenger {
                 throw new ArgumentNullException("listener");
             }
 
-            Dictionary<Type, List<SubscriberAction>> methodsInSubscriber = FindAllSubscribeMethods(listener);
+            Dictionary<Type, List<SubscriberAction>> methodsInSubscriber = SubscriberActionExtractor.FindAll(listener);
             List<TinyMessageSubscriptionToken> tokens = new List<TinyMessageSubscriptionToken>();
 
             foreach (var key in methodsInSubscriber.Keys) {
@@ -339,44 +334,11 @@ namespace TinyMessenger {
             publishAction.BeginInvoke(callback, null);
         }
 
-        private Dictionary<Type, List<SubscriberAction>> FindAllSubscribeMethods(object listener) {
-            var result = new Dictionary<Type, List<SubscriberAction>>();
-
-            foreach (MethodInfo method in GetMarkedMethods(listener)) {
-                ParameterInfo[] parmetersTypes = method.GetParameters();
-                Type eventType = parmetersTypes[0].ParameterType;
-                Action<object> action = (e) => {
-                    method.Invoke(listener, new object[] { e });
-                };
-                List<SubscriberAction> subscriberActions = null;
-                SubscriberAction subscriberAction = new SubscriberAction() { Action = action };
-
-                if (result.ContainsKey(eventType)) {
-                    subscriberActions = result[eventType];
-                    subscriberActions.Add(subscriberAction);
-                } else {
-                    subscriberActions = new List<SubscriberAction>();
-                    subscriberActions.Add(subscriberAction);
-                    result.Add(eventType, subscriberActions);
-                }
-            }
-
-            return result;
-        }
-
         private MethodInfo MakeGenericSubscribeInternalMethodWithType(Type genericType) {
             IEnumerable<MethodInfo> subscribeInternalMethods = this.GetType().GetRuntimeMethods().Where<MethodInfo>(method => {
                     return method.Name == "AddSubscriptionInternal" ? true : false;
                 });
             return subscribeInternalMethods.First().MakeGenericMethod(genericType);
-        }
-
-        private IEnumerable<MethodInfo> GetMarkedMethods(object listener) {
-            Type typeOfClass = listener.GetType();
-            return typeOfClass.GetRuntimeMethods().Where<MethodInfo>((method) => {
-                    Attribute attribute = method.GetCustomAttribute(typeof(Subscribe));
-                    return attribute == null ? false : true;
-                });
         }
 
         #endregion

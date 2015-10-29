@@ -44,6 +44,8 @@
     <Compile Include="IReportMessageDeliveryExceptions.cs" />
     <Compile Include="MainThreadAttribute.cs" />
     <Compile Include="SubscribeAttribute.cs" />
+    <Compile Include="SubscriberAction.cs" />
+    <Compile Include="SubscriberActionExtractor.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
 </Project>
