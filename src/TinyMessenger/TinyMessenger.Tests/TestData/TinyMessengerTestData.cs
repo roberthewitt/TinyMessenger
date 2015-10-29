@@ -78,4 +78,10 @@ namespace TinyMessenger.Tests.TestData {
             throw new Exception();
         }
     }
+
+    public class ListenerWithASubscriptionMethodWithoutArguments {
+        [Subscribe]
+        public void OnNoMessage() {
+        }
+    }
 }

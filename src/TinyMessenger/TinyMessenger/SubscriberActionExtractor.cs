@@ -10,6 +10,10 @@ namespace TinyMessenger {
 
             foreach (MethodInfo method in GetMarkedMethods(listener)) {
                 ParameterInfo[] parmetersTypes = method.GetParameters();
+
+                if (parmetersTypes.Length == 0) {
+                    throw new ArgumentException("listener has a Subscribe method without arguments");
+                }
                 Type eventType = parmetersTypes[0].ParameterType;
                 Action<object> action = (e) => {
                     method.Invoke(listener, new object[] { e });

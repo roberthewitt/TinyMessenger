@@ -200,10 +200,19 @@ namespace TinyMessenger.Tests {
 
         [Test]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void Register_NulListener_Throws() {
+        public void Register_NullListener_Throws() {
             var messenger = UtilityMethods.GetMessenger();
 
             messenger.Register(null);
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentException))]
+        public void Register_ListenerWithASubscriptionMethodWithoutArguments_Throws() {
+            var messenger = UtilityMethods.GetMessenger();
+            var listener = new ListenerWithASubscriptionMethodWithoutArguments();
+
+            messenger.Register(listener);
         }
 
         [Test]
