@@ -360,17 +360,17 @@ namespace TinyMessenger {
 
         private MethodInfo MakeGenericSubscribeInternalMethodWithType(Type genericType) {
             IEnumerable<MethodInfo> subscribeInternalMethods = this.GetType().GetRuntimeMethods().Where<MethodInfo>(method => {
-                return method.Name == "AddSubscriptionInternal" ? true : false;
-            });
+                    return method.Name == "AddSubscriptionInternal" ? true : false;
+                });
             return subscribeInternalMethods.First().MakeGenericMethod(genericType);
         }
 
         private IEnumerable<MethodInfo> GetMarkedMethods(object listener) {
             Type typeOfClass = listener.GetType();
             return typeOfClass.GetRuntimeMethods().Where<MethodInfo>((method) => {
-                Attribute attribute = method.GetCustomAttribute(typeof(Subscribe));
-                return attribute == null ? false : true;
-            });
+                    Attribute attribute = method.GetCustomAttribute(typeof(Subscribe));
+                    return attribute == null ? false : true;
+                });
         }
 
         #endregion
