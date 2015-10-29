@@ -108,6 +108,14 @@ namespace TinyMessenger.Tests {
         }
 
         [Test]
+        public void Unregister_NotAListener_DoesNotThrow() {
+            var messenger = UtilityMethods.GetMessenger();
+            var notAListener = new Object();
+
+            messenger.Unregister(notAListener);
+        }
+
+        [Test]
         public void Subscribe_PreviousSubscription_ReturnsDifferentSubscriptionObject() {
             var messenger = UtilityMethods.GetMessenger();
             var sub1 = messenger.Subscribe<TestMessage>(new Action<TestMessage>(UtilityMethods.FakeDeliveryAction<TestMessage>), new Func<TestMessage, bool>(UtilityMethods.FakeMessageFilter<TestMessage>));

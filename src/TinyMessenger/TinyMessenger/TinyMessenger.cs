@@ -502,10 +502,15 @@ namespace TinyMessenger {
         }
 
         public void Unregister(object listener) {
-            if (listener == null)
+            if (listener == null) {
                 throw new ArgumentNullException("listener");
+            }
 
             lock (_SubscriptionsPadlock) {
+                if (!_Listeners.ContainsKey(listener)) {
+                    return;
+                }
+
                 List<TinyMessageSubscriptionToken> tokens = _Listeners[listener];
 
                 foreach (var token in tokens) {
