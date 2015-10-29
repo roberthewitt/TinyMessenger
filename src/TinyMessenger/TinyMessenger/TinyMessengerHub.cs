@@ -94,6 +94,9 @@ namespace TinyMessenger {
         }
 
         public TinyMessageSubscriptionToken SubscribeOnMainThread<TMessage>(Action<TMessage> deliveryAction) where TMessage : class {
+            if (MainThreadTinyMessageProxy == null) {
+                throw new InvalidOperationException("Set MainThreadTinyMessageProxy before calling SubscribeOnMainThread");
+            }
             return AddSubscriptionInternal<TMessage>(deliveryAction, (m) => true, true, MainThreadTinyMessageProxy);
         }
 

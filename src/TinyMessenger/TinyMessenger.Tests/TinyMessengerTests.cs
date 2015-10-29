@@ -588,5 +588,13 @@ namespace TinyMessenger.Tests {
 
             mockMainThreadMessageProxy.Verify(mockProxy => mockProxy.Deliver(message, It.IsAny<ITinyMessageSubscription>()), Times.Exactly(1));
         }
+
+        [Test]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void SubscribeOnMainThread_MainThreadMessageProxyIsNull_Throws() {
+            var messenger = UtilityMethods.GetMessenger();
+
+            messenger.SubscribeOnMainThread<TestMessage>(tm => {});
+        }
     }
 }
