@@ -43,7 +43,7 @@ namespace TinyMessenger {
                 throw new ArgumentNullException("listener");
             }
 
-            Dictionary<Type, List<SubscriberAction>> methodsInSubscriber = SubscriberActionExtractor.FindAll(listener, MainThreadTinyMessageProxy);
+            Dictionary<Type, List<SubscriberAction>> methodsInSubscriber = SubscriberActionExtractor.FindAll(listener, ThreadHandler);
             List<TinyMessageSubscriptionToken> tokens = new List<TinyMessageSubscriptionToken>();
 
             foreach (var key in methodsInSubscriber.Keys) {

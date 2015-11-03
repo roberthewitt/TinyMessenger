@@ -2,8 +2,8 @@
 
 namespace TinyMessenger {
     public interface IHandleThreading {
-        ITinyMessageProxy mainThread();
+        ITinyMessageProxy MainThread();
 
-        ITinyMessageProxy backgroundThread();
+        ITinyMessageProxy BackgroundThread();
     }
 }

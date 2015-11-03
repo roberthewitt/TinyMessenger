@@ -210,7 +210,7 @@ namespace TinyMessenger.Tests {
             var mainThread = new Mock<ITinyMessageProxy>();
             Mock<IHandleThreading> threadHandler = new Mock<IHandleThreading>();
             threadHandler
-                .Setup(t => t.mainThread())
+                .Setup(t => t.MainThread())
                 .Returns(mainThread.Object);
             
             messenger.ThreadHandler = threadHandler.Object;
