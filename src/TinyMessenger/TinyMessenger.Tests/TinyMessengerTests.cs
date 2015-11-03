@@ -162,43 +162,45 @@ namespace TinyMessenger.Tests {
         }
 
         [Test]
-        public void PublishAsync_NoCallback_DoesNotThrow() {
+        public void PublishAsync_DoesNotThrow() {
             var messenger = UtilityMethods.GetMessenger();
 
             messenger.PublishAsync(new TestMessage());
         }
 
-//        [Test]
-//        public void PublishAsync_Callback_PublishesMessage() {
-//            var messenger = UtilityMethods.GetMessenger();
-//            bool received = false;
-//            messenger.Subscribe<TestMessage>((m) => {
-//                    received = true;
-//                });
-//
-//#pragma warning disable 219
-//            messenger.PublishAsync(new TestMessage(), (r) => {
-//                    string test = "Testing";
-//                });
-//#pragma warning restore 219
-//
-//            // Horrible wait loop!
-//            int waitCount = 0;
-//            while (!received && waitCount < 100) {
-//                Thread.Sleep(10);
-//                waitCount++;
-//            }
-//            Assert.IsTrue(received);
-//        }
+
+        private class RemembersCallStateHandler {
+
+            public Boolean HasBeenCalled {get;set;} = false;
+
+            [Subscribe]
+            public void OnTestMessage(TestMessage message) {
+                HasBeenCalled = true;
+            }
+        }
+
+        [Test]
+        public void PublishAsync_PublishesMessage() {
+            var messenger = UtilityMethods.GetMessenger();
+            var a = new RemembersCallStateHandler();
+            messenger.Register(a);
+
+            messenger.PublishAsync(new TestMessage());
+
+            // Horrible wait loop!
+            int waitCount = 0;
+            while (!a.HasBeenCalled && waitCount < 100) {
+                Thread.Sleep(10);
+                waitCount++;
+            }
+            Assert.IsTrue(a.HasBeenCalled);
+        }
 
         [Test]
         public void CancellableGenericTinyMessage_Publish_DoesNotThrow() {
             var messenger = UtilityMethods.GetMessenger();
-#pragma warning disable 219
-            messenger.Publish<CancellableGenericTinyMessage<string>>(new CancellableGenericTinyMessage<string>("Testing", () => {
-                        bool test = true;
-                    }));
-#pragma warning restore 219
+
+            messenger.Publish<CancellableGenericTinyMessage<string>>(new CancellableGenericTinyMessage<string>("Testing", () => {}));
         }
 
         [Test]
