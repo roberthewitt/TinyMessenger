@@ -8,6 +8,8 @@ namespace TinyMessenger {
         // Set the main thread proxy
         ITinyMessageProxy MainThreadTinyMessageProxy { get; set; }
 
+        IHandleThreading ThreadHandler { get; set;}
+
         /// <summary>
         /// Subscribe an object to all events that it subscribes to with the [Subscribe] method attribute
         /// 

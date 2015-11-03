@@ -207,14 +207,20 @@ namespace TinyMessenger.Tests {
         public void Publish_RegisteredWithSubscribeOnMainThread_MainThreadMessageProxyDoesDelivery() {
             var messenger = UtilityMethods.GetMessenger();
             var listener = new MainThreadListener();
-            var mockMainThreadMessageProxy = new Mock<ITinyMessageProxy>();
-            var message = new TestMessage();
-            messenger.MainThreadTinyMessageProxy = mockMainThreadMessageProxy.Object;
+            var mainThread = new Mock<ITinyMessageProxy>();
+            Mock<IHandleThreading> threadHandler = new Mock<IHandleThreading>();
+            threadHandler
+                .Setup(t => t.mainThread())
+                .Returns(mainThread.Object);
+            
+            messenger.ThreadHandler = threadHandler.Object;
 
             messenger.Register(listener);
+
+            var message = new TestMessage();
             messenger.Publish(message);
 
-            mockMainThreadMessageProxy.Verify(mockProxy => mockProxy.Deliver(message, It.IsAny<ITinyMessageSubscription>()), Times.Exactly(1));
+            mainThread.Verify(p => p.Deliver(message, It.IsAny<ITinyMessageSubscription>()), Times.Exactly(1));
         }
 
         [Test]

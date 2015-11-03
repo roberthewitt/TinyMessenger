@@ -29,6 +29,8 @@ namespace TinyMessenger {
 
         public ITinyMessageProxy MainThreadTinyMessageProxy { get; set; }
 
+        public IHandleThreading ThreadHandler { get; set; }
+
         public TinyMessengerHub() : this(null) {
         }
 

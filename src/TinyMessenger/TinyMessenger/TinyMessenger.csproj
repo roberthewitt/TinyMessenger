@@ -48,6 +48,8 @@
     <Compile Include="SubscriberActionExtractor.cs" />
     <Compile Include="StrongTinyMessageSubscription.cs" />
     <Compile Include="WeakTinyMessageSubscription.cs" />
+    <Compile Include="BackgroundThreadAttribution.cs" />
+    <Compile Include="IHandleThreading.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
 </Project>
