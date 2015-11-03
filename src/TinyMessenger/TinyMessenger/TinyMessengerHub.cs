@@ -128,7 +128,7 @@ namespace TinyMessenger {
             return AddSubscriptionInternal<TMessage>(deliveryAction, messageFilter, useStrongReferences, proxy);
         }
 
-        private void Unsubscribe<TMessage>(TinyMessageSubscriptionToken subscriptionToken) where TMessage : class {
+        public void Unsubscribe<TMessage>(TinyMessageSubscriptionToken subscriptionToken) where TMessage : class {
             RemoveSubscriptionInternal<TMessage>(subscriptionToken);
         }
 

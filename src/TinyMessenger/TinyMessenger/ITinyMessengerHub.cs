@@ -37,5 +37,7 @@ namespace TinyMessenger {
         /// <typeparam name="TMessage">Type of message</typeparam>
         /// <param name="message">Message to deliver</param>
         void PublishAsync<TMessage>(TMessage message) where TMessage : class;
+
+        void Unsubscribe<TMessage>(TinyMessageSubscriptionToken subscriptionToken) where TMessage : class;
     }
 }
