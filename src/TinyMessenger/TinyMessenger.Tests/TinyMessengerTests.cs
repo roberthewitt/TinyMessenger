@@ -212,7 +212,7 @@ namespace TinyMessenger.Tests {
             threadHandler
                 .Setup(t => t.MainThread())
                 .Returns(mainThread.Object);
-            
+
             messenger.ThreadHandler = threadHandler.Object;
 
             messenger.Register(listener);
@@ -221,6 +221,26 @@ namespace TinyMessenger.Tests {
             messenger.Publish(message);
 
             mainThread.Verify(p => p.Deliver(message, It.IsAny<ITinyMessageSubscription>()), Times.Exactly(1));
+        }
+
+        [Test]
+        public void Publish_RegisteredWithSubscribeOnBackgroundThread_BackgroundThreadMessageProxyDoesDelivery() {
+            var messenger = UtilityMethods.GetMessenger();
+            var listener = new BackgroundThreadListener();
+            var backgroundThread = new Mock<ITinyMessageProxy>();
+            Mock<IHandleThreading> threadHandler = new Mock<IHandleThreading>();
+            threadHandler
+                .Setup(t => t.BackgroundThread())
+                .Returns(backgroundThread.Object);
+
+            messenger.ThreadHandler = threadHandler.Object;
+
+            messenger.Register(listener);
+
+            var message = new TestMessage();
+            messenger.Publish(message);
+
+            backgroundThread.Verify(p => p.Deliver(message, It.IsAny<ITinyMessageSubscription>()), Times.Exactly(1));
         }
 
         [Test]

@@ -35,9 +35,15 @@ namespace TinyMessenger {
 
                 if (method.GetCustomAttribute(typeof(MainThread)) != null) {
                     if (threading == null) {
-                        throw new InvalidOperationException("Set ThreadHandler before Registering a class that Subscribes for a particular Thread");
+                        throw new InvalidOperationException("Set ThreadHandler before Registering a class that Subscribes for a main Thread");
                     }
                     subscriberAction.Proxy = threading.MainThread();
+                }
+                if (method.GetCustomAttribute(typeof(BackgroundThread)) != null) {
+                    if (threading == null) {
+                        throw new InvalidOperationException("Set ThreadHandler before Registering a class that Subscribes for a background Thread");
+                    }
+                    subscriberAction.Proxy = threading.BackgroundThread();
                 }
             }
 

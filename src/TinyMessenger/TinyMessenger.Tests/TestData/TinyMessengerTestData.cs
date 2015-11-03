@@ -99,4 +99,13 @@ namespace TinyMessenger.Tests.TestData {
             ReceivedTestMessage = message;
         }
     }
+
+    public class BackgroundThreadListener {
+        public TestMessage ReceivedTestMessage;
+
+        [Subscribe, BackgroundThread]
+        public void OnTestMessageMain(TestMessage message) {
+            ReceivedTestMessage = message;
+        }
+    }
 }
