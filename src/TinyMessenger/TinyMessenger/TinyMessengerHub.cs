@@ -89,46 +89,46 @@ namespace TinyMessenger {
             }
         }
 
-        public TinyMessageSubscriptionToken Subscribe<TMessage>(Action<TMessage> deliveryAction) where TMessage : class {
+        private TinyMessageSubscriptionToken Subscribe<TMessage>(Action<TMessage> deliveryAction) where TMessage : class {
             return AddSubscriptionInternal<TMessage>(deliveryAction, (m) => true, true, DefaultTinyMessageProxy.Instance);
         }
 
-        public TinyMessageSubscriptionToken SubscribeOnMainThread<TMessage>(Action<TMessage> deliveryAction) where TMessage : class {
+        private TinyMessageSubscriptionToken SubscribeOnMainThread<TMessage>(Action<TMessage> deliveryAction) where TMessage : class {
             if (MainThreadTinyMessageProxy == null) {
                 throw new InvalidOperationException("Set MainThreadTinyMessageProxy before calling SubscribeOnMainThread");
             }
             return AddSubscriptionInternal<TMessage>(deliveryAction, (m) => true, true, MainThreadTinyMessageProxy);
         }
 
-        public TinyMessageSubscriptionToken Subscribe<TMessage>(Action<TMessage> deliveryAction, ITinyMessageProxy proxy) where TMessage : class {
+        private TinyMessageSubscriptionToken Subscribe<TMessage>(Action<TMessage> deliveryAction, ITinyMessageProxy proxy) where TMessage : class {
             return AddSubscriptionInternal<TMessage>(deliveryAction, (m) => true, true, proxy);
         }
 
-        public TinyMessageSubscriptionToken Subscribe<TMessage>(Action<TMessage> deliveryAction, bool useStrongReferences) where TMessage : class {
+        private TinyMessageSubscriptionToken Subscribe<TMessage>(Action<TMessage> deliveryAction, bool useStrongReferences) where TMessage : class {
             return AddSubscriptionInternal<TMessage>(deliveryAction, (m) => true, useStrongReferences, DefaultTinyMessageProxy.Instance);
         }
 
-        public TinyMessageSubscriptionToken Subscribe<TMessage>(Action<TMessage> deliveryAction, bool useStrongReferences, ITinyMessageProxy proxy) where TMessage : class {
+        private TinyMessageSubscriptionToken Subscribe<TMessage>(Action<TMessage> deliveryAction, bool useStrongReferences, ITinyMessageProxy proxy) where TMessage : class {
             return AddSubscriptionInternal<TMessage>(deliveryAction, (m) => true, useStrongReferences, proxy);
         }
 
-        public TinyMessageSubscriptionToken Subscribe<TMessage>(Action<TMessage> deliveryAction, Func<TMessage, bool> messageFilter) where TMessage : class {
+        private TinyMessageSubscriptionToken Subscribe<TMessage>(Action<TMessage> deliveryAction, Func<TMessage, bool> messageFilter) where TMessage : class {
             return AddSubscriptionInternal<TMessage>(deliveryAction, messageFilter, true, DefaultTinyMessageProxy.Instance);
         }
 
-        public TinyMessageSubscriptionToken Subscribe<TMessage>(Action<TMessage> deliveryAction, Func<TMessage, bool> messageFilter, ITinyMessageProxy proxy) where TMessage : class {
+        private TinyMessageSubscriptionToken Subscribe<TMessage>(Action<TMessage> deliveryAction, Func<TMessage, bool> messageFilter, ITinyMessageProxy proxy) where TMessage : class {
             return AddSubscriptionInternal<TMessage>(deliveryAction, messageFilter, true, proxy);
         }
 
-        public TinyMessageSubscriptionToken Subscribe<TMessage>(Action<TMessage> deliveryAction, Func<TMessage, bool> messageFilter, bool useStrongReferences) where TMessage : class {
+        private TinyMessageSubscriptionToken Subscribe<TMessage>(Action<TMessage> deliveryAction, Func<TMessage, bool> messageFilter, bool useStrongReferences) where TMessage : class {
             return AddSubscriptionInternal<TMessage>(deliveryAction, messageFilter, useStrongReferences, DefaultTinyMessageProxy.Instance);
         }
 
-        public TinyMessageSubscriptionToken Subscribe<TMessage>(Action<TMessage> deliveryAction, Func<TMessage, bool> messageFilter, bool useStrongReferences, ITinyMessageProxy proxy) where TMessage : class {
+        private TinyMessageSubscriptionToken Subscribe<TMessage>(Action<TMessage> deliveryAction, Func<TMessage, bool> messageFilter, bool useStrongReferences, ITinyMessageProxy proxy) where TMessage : class {
             return AddSubscriptionInternal<TMessage>(deliveryAction, messageFilter, useStrongReferences, proxy);
         }
 
-        public void Unsubscribe<TMessage>(TinyMessageSubscriptionToken subscriptionToken) where TMessage : class {
+        private void Unsubscribe<TMessage>(TinyMessageSubscriptionToken subscriptionToken) where TMessage : class {
             RemoveSubscriptionInternal<TMessage>(subscriptionToken);
         }
 
@@ -140,7 +140,7 @@ namespace TinyMessenger {
             PublishAsyncInternal<TMessage>(message, null);
         }
 
-        public void PublishAsync<TMessage>(TMessage message, AsyncCallback callback) where TMessage : class {
+        private void PublishAsync<TMessage>(TMessage message, AsyncCallback callback) where TMessage : class {
             PublishAsyncInternal<TMessage>(message, callback);
         }
 
